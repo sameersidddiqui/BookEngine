@@ -6,12 +6,14 @@ application does not send documents to external services. Saved PDFs and their
 library metadata are stored on the configured server filesystem; no database
 or cloud storage is required.
 
-Extracted text is organized into semantic reader blocks (`p`, `h2`, `ul`,
-`ol`, `blockquote`, `table`, `code`, and `footnote`) using PDF text positions,
-columns, font sizes, spacing, and repeated page-edge text. Heuristics retain
-ambiguous content rather than aggressively rewriting it. This is deterministic
-rule-based processing; no AI or OCR service is used. The existing `text`
-response field remains available for plain-text copy and download.
+Extracted text is organized into semantic reader blocks (`p`, `h1`, `h2`, `h3`,
+`toc`, `ul`, `ol`, `blockquote`, `table`, `code`, and `footnote`) using PDF text
+positions, columns, font styles, font sizes, spacing, and repeated page-edge
+text. Paragraphs can continue across a page boundary; each block includes its
+starting `pageNumber` and ending `endPageNumber` for navigation. Heuristics
+retain ambiguous content rather than aggressively rewriting it. This is
+deterministic rule-based processing; no AI or OCR service is used. The existing
+`text` response field remains available for plain-text copy and download.
 
 ## Technology and prerequisites
 
@@ -108,8 +110,8 @@ A successful response includes the uploaded file name, page count, available met
   },
   "text": "Chapter One\n\nExtracted document text...",
   "blocks": [
-    { "type": "h2", "text": "Chapter One" },
-    { "type": "p", "text": "Extracted document text..." }
+    { "type": "h2", "text": "Chapter One", "pageNumber": 1, "endPageNumber": 1 },
+    { "type": "p", "text": "Extracted document text...", "pageNumber": 1, "endPageNumber": 2 }
   ]
 }
 ```

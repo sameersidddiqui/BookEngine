@@ -24,6 +24,14 @@ public class PdfTextExtractor {
 
 	private static final Pattern LIST_ITEM = Pattern.compile(
 			"^(?:[•●▪◦‣⁃*-]|(?:\\d+|[A-Za-z])[.)])\\s+(.+)$");
+	private static final Pattern STRUCTURAL_HEADING = Pattern.compile(
+			"(?i)^(?:(?:part|chapter|book|volume|section|appendix)\\s+"
+					+ "(?:[ivxlcdm]+|\\d+[a-z]?|[a-z]+)\\b|"
+					+ "prologue|epilogue|introduction|conclusion|preface|foreword|"
+					+ "dedication|acknowledgements?|contents|table of contents|bibliography|index)\\b.*$");
+	private static final Pattern TOC_TITLE = Pattern.compile(
+			"(?i)^(?:table of contents|contents|in this book|contents at a glance)$");
+	private static final Pattern TOC_LEADER = Pattern.compile("\\s*(?:\\.{2,}|·{2,}|…{1,})\\s*");
 
 	public PdfExtractionResult extract(byte[] pdfContent) {
 		try (PDDocument document = Loader.loadPDF(pdfContent)) {
@@ -63,6 +71,7 @@ public class PdfTextExtractor {
 		Map<String, Integer> repeatedPageLines = repeatedPageLines(pages);
 		List<PdfTextBlock> blocks = new ArrayList<>();
 		BlockBuilder builder = new BlockBuilder(blocks);
+		boolean inContents = false;
 
 		for (List<PositionedLine> page : pages) {
 			List<PositionedLine> pageContent = page.stream()
@@ -71,7 +80,23 @@ public class PdfTextExtractor {
 			List<PositionedLine> visibleLines = orderForReading(
 					combineTableRows(removeDuplicateLines(pageContent)));
 			double leftMargin = visibleLines.stream().mapToDouble(PositionedLine::x).min().orElse(0);
-
+			PositionedLine firstLine = visibleLines.stream().filter(line -> !line.text().isBlank()).findFirst().orElse(null);
+			if (firstLine == null) {
+				builder.finishParagraph();
+				builder.finishList();
+				builder.finishTable();
+				continue;
+			}
+			if (builder.hasParagraph()
+					&& !continuesAcrossPage(builder.previousLine(), firstLine, builder.paragraphStartX(),
+							builder.paragraphType(), typicalFontSize)) {
+				builder.finishParagraph();
+			}
+			if (builder.hasList() && !continuesListAcrossPage(firstLine, builder.lastListLine(), leftMargin,
+					typicalFontSize)) {
+				builder.finishList();
+			}
+			builder.finishTable();
 			for (int index = 0; index < visibleLines.size(); index++) {
 				PositionedLine line = visibleLines.get(index);
 				PositionedLine previous = index > 0 ? visibleLines.get(index - 1) : null;
@@ -80,11 +105,36 @@ public class PdfTextExtractor {
 				if (value.isBlank()) {
 					continue;
 				}
+				if (TOC_TITLE.matcher(value).matches()) {
+					builder.finishParagraph();
+					builder.finishList();
+					builder.addBlock("h2", value, line);
+					inContents = true;
+					continue;
+				}
+				if (inContents && isContentsEntry(value)) {
+					builder.finishParagraph();
+					builder.finishList();
+					builder.finishTable();
+					builder.addBlock("toc", normalizeContentsEntry(value), line);
+					continue;
+				}
+				if (inContents && isStructuralHeading(value)) {
+					inContents = false;
+				}
+				if (next != null && isFragmentedRomanHeading(line, next, typicalFontSize)) {
+					builder.finishParagraph();
+					builder.finishList();
+					String type = isStructuralHeading(next.text()) ? headingType(next, typicalFontSize) : "h2";
+					builder.addBlock(type, value + " " + next.text(), line, next);
+					index++;
+					continue;
+				}
 
 				if (line.tableRow()) {
 					builder.finishParagraph();
 					builder.finishList();
-					builder.addTableRow(value);
+					builder.addTableRow(value, line);
 					continue;
 				}
 				builder.finishTable();
@@ -92,7 +142,7 @@ public class PdfTextExtractor {
 				if (line.fontSize() <= typicalFontSize * 0.78 && line.y() > line.pageHeight() * 0.78) {
 					builder.finishParagraph();
 					builder.finishList();
-					builder.addBlock("footnote", value);
+					builder.addBlock("footnote", value, line);
 					continue;
 				}
 
@@ -111,35 +161,100 @@ public class PdfTextExtractor {
 
 				if (isHeading(line, previous, next, typicalFontSize)) {
 					builder.finishParagraph();
-					builder.addBlock("h2", value);
+					builder.addBlock(headingType(line, typicalFontSize), value, line);
 					continue;
 				}
 
 				boolean codeContinuation = builder.hasParagraph() && builder.paragraphType().equals("code")
 						&& line.monospace();
+				boolean quote = line.italic() && line.x() > leftMargin + Math.max(12, typicalFontSize)
+						|| value.matches("^[“‘\"].*[”’\"]$");
 				String blockType = codeContinuation || line.monospace() && (line.x() > leftMargin + typicalFontSize
-						|| value.matches(".*[{};=<>].*"))
-						? "code"
-						: line.x() > leftMargin + Math.max(24, typicalFontSize * 2) ? "blockquote" : "p";
+						|| value.matches(".*[{};=<>].*")) ? "code" : quote ? "blockquote" : "p";
 				if (builder.hasParagraph() && (!builder.paragraphType().equals(blockType)
 						|| startsNewParagraph(line, builder.previousLine(), builder.paragraphStartX(), typicalFontSize))) {
 					builder.finishParagraph();
 				}
 				builder.appendParagraph(value, blockType, line);
 
-				if (next == null || startsNewParagraph(next, line, builder.paragraphStartX(), typicalFontSize)
+				if (next != null && (startsNewParagraph(next, line, builder.paragraphStartX(), typicalFontSize)
 						|| isHeading(next, line, index + 2 < visibleLines.size() ? visibleLines.get(index + 2) : null,
 								typicalFontSize)
 						|| LIST_ITEM.matcher(next.text()).matches()
-						|| next.tableRow() || next.monospace() != line.monospace()) {
+						|| next.tableRow() || next.monospace() != line.monospace())) {
 					builder.finishParagraph();
 				}
 			}
-			builder.finishPage();
 		}
 
-		builder.finishPage();
+		builder.finishParagraph();
+		builder.finishList();
+		builder.finishTable();
 		return List.copyOf(blocks);
+	}
+
+	private boolean isContentsEntry(String text) {
+		return text.matches(".*(?:\\.{2,}|·{2,}|…|\\s+\\d{1,4})\\s*$");
+	}
+
+	private String normalizeContentsEntry(String text) {
+		return TOC_LEADER.matcher(text).replaceAll(" — ").replaceAll("\\s+", " ").strip();
+	}
+
+	private boolean isStructuralHeading(String text) {
+		return STRUCTURAL_HEADING.matcher(text.strip()).matches();
+	}
+
+	private String headingType(PositionedLine line, double typicalFontSize) {
+		String value = line.text().strip();
+		if (value.matches("(?i)^part\\s+.*") || value.matches("(?i)^(?:prologue|epilogue)$")) {
+			return "h1";
+		}
+		if (value.matches("(?i)^section\\s+.*")) {
+			return "h3";
+		}
+		if (value.matches("(?i)^chapter\\s+.*") || value.matches("(?i)^(?:introduction|conclusion|appendix)\\b.*")) {
+			return "h2";
+		}
+		return line.fontSize() >= typicalFontSize * 1.95 ? "h1"
+				: line.fontSize() >= typicalFontSize * 1.3 ? "h2" : "h3";
+	}
+
+	private boolean continuesAcrossPage(
+			PositionedLine previous, PositionedLine first, double paragraphStartX, String paragraphType,
+			double typicalFontSize) {
+		if (previous == null || first == null || paragraphType == null
+				|| !paragraphType.equals("p") && !paragraphType.equals("blockquote")
+				|| previous.pageNumber() == first.pageNumber()
+				|| previous.pageHeight() != first.pageHeight()
+				|| previous.y() < previous.pageHeight() * 0.6
+				|| first.y() > first.pageHeight() * 0.4
+				|| previous.monospace() || first.monospace()
+				|| Math.abs(previous.fontSize() - first.fontSize()) > typicalFontSize * 0.12
+				|| Math.abs(first.x() - paragraphStartX) > typicalFontSize * 1.4
+				|| endsSentence(previous.text())) {
+			return false;
+		}
+		return first.text().isEmpty() || Character.isLowerCase(first.text().codePointAt(0))
+				|| Character.isDigit(first.text().codePointAt(0))
+				|| startsWithContinuationPunctuation(first.text());
+	}
+
+	private boolean continuesListAcrossPage(
+			PositionedLine first, PositionedLine last, double leftMargin, double typicalFontSize) {
+		return first != null && last != null && first.pageNumber() != last.pageNumber()
+				&& last.y() > last.pageHeight() * 0.6 && first.y() < first.pageHeight() * 0.4
+				&& LIST_ITEM.matcher(first.text()).matches()
+				&& Math.abs(first.fontSize() - last.fontSize()) <= typicalFontSize * 0.15
+				&& Math.abs(first.x() - last.x()) <= typicalFontSize * 2;
+	}
+
+	private boolean endsSentence(String text) {
+		return text.stripTrailing().matches(".*[.!?…][\"”’')\\]]*$");
+	}
+
+	private boolean startsWithContinuationPunctuation(String text) {
+		return text.matches("^[,.;:!?)}\\]].*");
 	}
 
 	private List<PositionedLine> orderForReading(List<PositionedLine> lines) {
@@ -297,8 +412,8 @@ public class PdfTextExtractor {
 		PositionedLine last = ordered.get(ordered.size() - 1);
 		return new PositionedLine(text, first.x(), last.endX(), first.y(),
 				ordered.stream().mapToDouble(PositionedLine::fontSize).average().orElse(first.fontSize()),
-				first.pageHeight(), first.pageWidth(),
-				ordered.stream().anyMatch(PositionedLine::bold), false, true);
+				first.pageHeight(), first.pageWidth(), first.pageNumber(),
+				ordered.stream().anyMatch(PositionedLine::bold), false, false, true);
 	}
 
 	private Map<String, Integer> repeatedPageLines(List<List<PositionedLine>> pages) {
@@ -332,14 +447,30 @@ public class PdfTextExtractor {
 
 	private boolean isHeading(
 			PositionedLine line, PositionedLine previous, PositionedLine next, double typicalFontSize) {
-		if (line.text().length() > 80) {
+		String text = line.text().strip();
+		if (text.length() > 100 || text.isEmpty() || text.matches(".*[.!?;:]$")) {
 			return false;
 		}
-		boolean spaced = previous == null || line.y() - previous.y() > typicalFontSize * 1.5
-				|| next == null || next.y() - line.y() > typicalFontSize * 1.5;
-		return line.fontSize() >= typicalFontSize * 1.25
-				|| line.bold() && line.fontSize() >= typicalFontSize * 1.05 && (spaced || line.text().length() <= 45)
-				|| isAllCapsHeading(line.text()) && line.text().length() <= 55 && spaced;
+		if (isStructuralHeading(text)) {
+			return true;
+		}
+		boolean spacedBefore = previous != null && line.y() - previous.y() > typicalFontSize * 1.7;
+		boolean spacedAfter = next != null && next.y() - line.y() > typicalFontSize * 1.7;
+		boolean spaced = spacedBefore || spacedAfter;
+		boolean compactHeading = text.split("\\s+").length <= 8;
+		return compactHeading && line.fontSize() >= typicalFontSize * 1.45
+				|| compactHeading && line.bold() && line.fontSize() >= typicalFontSize * 1.05 && spaced
+				|| compactHeading && isAllCapsHeading(text) && text.length() <= 55 && spaced;
+	}
+
+	private boolean isFragmentedRomanHeading(
+			PositionedLine numeral, PositionedLine title, double typicalFontSize) {
+		return numeral.text().matches("(?i)^(?:[ivxlcdm]{1,8})\\.?$")
+				&& Math.abs(numeral.x() - title.x()) <= typicalFontSize
+				&& title.y() - numeral.y() <= typicalFontSize * 2.5
+				&& (numeral.bold() || title.bold() || title.fontSize() >= typicalFontSize * 1.2
+						|| title.text().equals(title.text().toUpperCase(Locale.ROOT))
+								&& title.text().matches(".*\\p{L}.*"));
 	}
 
 	private boolean isAllCapsHeading(String text) {
@@ -361,10 +492,26 @@ public class PdfTextExtractor {
 	}
 
 	private String joinLines(String previous, String next) {
-		if (previous.matches(".*[-\\u00ad]$") && !next.isEmpty() && Character.isLowerCase(next.charAt(0))) {
+		if (previous.endsWith("\u00ad") && !next.isEmpty() && Character.isLowerCase(next.codePointAt(0))) {
 			return previous.substring(0, previous.length() - 1) + next;
 		}
+		if (previous.matches(".*[A-Za-z]-$") && !next.isEmpty() && Character.isLowerCase(next.codePointAt(0))) {
+			return isLikelyDiscretionaryHyphen(previous, next)
+					? previous.substring(0, previous.length() - 1) + next
+					: previous + next;
+		}
 		return previous + " " + next;
+	}
+
+	private boolean isLikelyDiscretionaryHyphen(String previous, String next) {
+		String left = previous.substring(previous.lastIndexOf(' ') + 1, previous.length() - 1).toLowerCase(Locale.ROOT);
+		String right = next.split("\\s+", 2)[0].toLowerCase(Locale.ROOT);
+		if (left.length() < 3 || right.length() < 3) {
+			return false;
+		}
+		return !List.of("known", "being", "bred", "proof", "made", "based", "wide", "shaped",
+				"life", "long", "term", "class", "worker", "time", "century", "friendly", "minded",
+				"speaking", "reading", "standing", "looking", "to").contains(right);
 	}
 
 	private double median(double[] values) {
@@ -411,6 +558,9 @@ public class PdfTextExtractor {
 			double pageWidth = textPositions.get(0).getPageWidth();
 			boolean bold = textPositions.stream().anyMatch(position ->
 					position.getFont() != null && position.getFont().getName().toLowerCase(Locale.ROOT).contains("bold"));
+			boolean italic = textPositions.stream().anyMatch(position ->
+					position.getFont() != null && position.getFont().getName().toLowerCase(Locale.ROOT)
+							.matches(".*(italic|oblique).*"));
 			boolean monospace = textPositions.stream().allMatch(position ->
 					position.getFont() != null && position.getFont().getName().toLowerCase(Locale.ROOT)
 							.matches(".*(courier|mono|typewriter).*"));
@@ -435,7 +585,7 @@ public class PdfTextExtractor {
 			}
 			this.pages.get(this.pages.size() - 1)
 					.add(new PositionedLine(lineText, x, endX, y, fontSize, pageHeight, pageWidth,
-							bold, monospace, tableRow));
+							this.pages.size(), bold, italic, monospace, tableRow));
 		}
 
 		List<List<PositionedLine>> pages() {
@@ -445,7 +595,7 @@ public class PdfTextExtractor {
 
 	private record PositionedLine(
 			String text, double x, double endX, double y, double fontSize, double pageHeight, double pageWidth,
-			boolean bold, boolean monospace, boolean tableRow) {
+			int pageNumber, boolean bold, boolean italic, boolean monospace, boolean tableRow) {
 	}
 
 	private final class BlockBuilder {
@@ -459,6 +609,12 @@ public class PdfTextExtractor {
 		private PositionedLine previousLine;
 		private PositionedLine lastListLine;
 		private double paragraphStartX;
+		private int paragraphStartPage;
+		private int paragraphEndPage;
+		private int listStartPage;
+		private int listEndPage;
+		private int tableStartPage;
+		private int tableEndPage;
 
 		BlockBuilder(List<PdfTextBlock> blocks) {
 			this.blocks = blocks;
@@ -478,9 +634,11 @@ public class PdfTextExtractor {
 			else {
 				this.paragraph = new StringBuilder(text);
 				this.paragraphStartX = line.x();
+				this.paragraphStartPage = line.pageNumber();
 			}
 			this.paragraphType = type;
 			this.previousLine = line;
+			this.paragraphEndPage = line.pageNumber();
 		}
 
 		boolean hasParagraph() {
@@ -501,16 +659,23 @@ public class PdfTextExtractor {
 
 		void finishParagraph() {
 			if (hasParagraph()) {
-				this.blocks.add(new PdfTextBlock(this.paragraphType, this.paragraph.toString()));
+				this.blocks.add(new PdfTextBlock(
+						this.paragraphType, this.paragraph.toString(), this.paragraphStartPage, this.paragraphEndPage));
 				this.paragraph = new StringBuilder();
 				this.paragraphType = null;
 				this.previousLine = null;
 				this.paragraphStartX = 0;
+				this.paragraphStartPage = 0;
+				this.paragraphEndPage = 0;
 			}
 		}
 
-		void addBlock(String type, String text) {
-			this.blocks.add(new PdfTextBlock(type, text));
+		void addBlock(String type, String text, PositionedLine line) {
+			this.blocks.add(new PdfTextBlock(type, text, line.pageNumber()));
+		}
+
+		void addBlock(String type, String text, PositionedLine first, PositionedLine last) {
+			this.blocks.add(new PdfTextBlock(type, text, first.pageNumber(), last.pageNumber()));
 		}
 
 		void startList(String type) {
@@ -522,8 +687,12 @@ public class PdfTextExtractor {
 		}
 
 		void addListItem(String text, PositionedLine line) {
+			if (this.listItems.isEmpty()) {
+				this.listStartPage = line.pageNumber();
+			}
 			this.listItems.add(text);
 			this.lastListLine = line;
+			this.listEndPage = line.pageNumber();
 		}
 
 		boolean hasList() {
@@ -534,6 +703,10 @@ public class PdfTextExtractor {
 			return this.listItems.get(this.listItems.size() - 1);
 		}
 
+		PositionedLine lastListLine() {
+			return this.lastListLine;
+		}
+
 		boolean isListContinuation(PositionedLine line, double leftMargin, double typicalFontSize) {
 			return this.lastListLine != null && line.x() > leftMargin + typicalFontSize
 					&& line.y() - this.lastListLine.y() <= typicalFontSize * 1.55;
@@ -542,32 +715,37 @@ public class PdfTextExtractor {
 		void appendToLastListItem(String text, PositionedLine line) {
 			this.listItems.set(this.listItems.size() - 1, text);
 			this.lastListLine = line;
+			this.listEndPage = line.pageNumber();
 		}
 
 		void finishList() {
 			if (hasList()) {
-				this.blocks.add(new PdfTextBlock(this.listType, String.join("\n", this.listItems)));
+				this.blocks.add(new PdfTextBlock(
+						this.listType, String.join("\n", this.listItems), this.listStartPage, this.listEndPage));
 				this.listItems.clear();
 				this.lastListLine = null;
 				this.listType = null;
+				this.listStartPage = 0;
+				this.listEndPage = 0;
 			}
 		}
 
-		void addTableRow(String text) {
+		void addTableRow(String text, PositionedLine line) {
+			if (this.tableRows.isEmpty()) {
+				this.tableStartPage = line.pageNumber();
+			}
 			this.tableRows.add(text);
+			this.tableEndPage = line.pageNumber();
 		}
 
 		void finishTable() {
 			if (!this.tableRows.isEmpty()) {
-				this.blocks.add(new PdfTextBlock("table", String.join("\n", this.tableRows)));
+				this.blocks.add(new PdfTextBlock(
+						"table", String.join("\n", this.tableRows), this.tableStartPage, this.tableEndPage));
 				this.tableRows.clear();
+				this.tableStartPage = 0;
+				this.tableEndPage = 0;
 			}
-		}
-
-		void finishPage() {
-			finishParagraph();
-			finishList();
-			finishTable();
 		}
 	}
 

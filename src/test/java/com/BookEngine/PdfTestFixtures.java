@@ -105,6 +105,53 @@ public final class PdfTestFixtures {
 		}
 	}
 
+	public static byte[] bookLikePdf() throws IOException {
+		try (PDDocument document = new PDDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+			PDPage contents = new PDPage();
+			document.addPage(contents);
+			try (PDPageContentStream stream = new PDPageContentStream(document, contents)) {
+				writeLine(stream, "TABLE OF CONTENTS", 50, 750, 18,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD));
+				writeLine(stream, "PART I ............................ 1", 50, 710, 12,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA));
+				writeLine(stream, "Chapter 1 The Beginning ........... 2", 65, 690, 12,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA));
+			}
+
+			PDPage firstChapter = new PDPage();
+			document.addPage(firstChapter);
+			try (PDPageContentStream stream = new PDPageContentStream(document, firstChapter)) {
+				writeLine(stream, "PART I", 50, 750, 18,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD));
+				writeLine(stream, "I", 50, 715, 20,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD));
+				writeLine(stream, "BEGINNINGS", 50, 690, 20,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD));
+				writeLine(stream, "A continuous book paragraph starts here", 50, 650, 12,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA));
+				writeLine(stream, "and continues on the next visual line.", 50, 635, 12,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA));
+				writeLine(stream, "A new paragraph follows real vertical space.", 50, 600, 12,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA));
+				writeLine(stream, "This sentence continues at the top of the next page", 50, 180, 12,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA));
+			}
+
+			PDPage secondChapterPage = new PDPage();
+			document.addPage(secondChapterPage);
+			try (PDPageContentStream stream = new PDPageContentStream(document, secondChapterPage)) {
+				writeLine(stream, "after crossing a page boundary.", 50, 730, 12,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA));
+				writeLine(stream, "Well-", 50, 690, 12,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA));
+				writeLine(stream, "known compounds stay hyphenated.", 50, 675, 12,
+						new PDType1Font(Standard14Fonts.FontName.HELVETICA));
+			}
+			document.save(output);
+			return output.toByteArray();
+		}
+	}
+
 	private static void writeTableRow(
 			PDPageContentStream content, float x, float y, String first, String second, String third) throws IOException {
 		content.beginText();

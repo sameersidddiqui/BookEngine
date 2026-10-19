@@ -243,7 +243,8 @@
 		.reader-content h2 { margin: 1.65em 0 .6em; font-size: 1.5em; font-weight: 600; letter-spacing: -.025em; line-height: 1.25; scroll-margin-top: 115px; }
 		.reader-content > :first-child { margin-top: 0; }
 		.reader-content p { margin: 0 0 1.15em; }
-		.reader-content .reader-extracted-paragraph { white-space: pre-line; }
+		.reader-content .reader-extracted-paragraph { white-space: normal; }
+		.reader-content .reader-toc-entry { margin: 0 0 .55em; padding-left: 1.15em; text-indent: -1.15em; font-size: .94em; }
 		.reader-content ul, .reader-content ol { margin: 0 0 1.15em; padding-left: 1.4em; }
 		.reader-content li { padding-left: .2em; }
 		.reader-table-wrap { width: 100%; max-width: 100%; overflow-x: auto; margin: 0 0 1.4em; overscroll-behavior-inline: contain; }
@@ -526,7 +527,7 @@
 				<ul class="library-list" id="library-list"></ul>
 			</section>
 			<section class="reader-document" id="reader-document" hidden aria-label="Reader">
-				<div class="reader-toolbar">
+				<div class="reader-toolbar" id="reader-toolbar">
 					<button class="reader-control text" id="reader-back" type="button" aria-label="Return to results">← Results</button>
 					<h1 class="reader-title" id="reader-title" tabindex="-1"></h1>
 					<div class="reader-tools">
@@ -1012,7 +1013,10 @@
 			return data.blocks.map(block => {
 				if (!block || typeof block.text !== "string") return "";
 				switch (block.type) {
+					case "h1": return `# ${block.text}`;
 					case "h2": return `## ${block.text}`;
+					case "h3": return `### ${block.text}`;
+					case "toc": return `- ${block.text}`;
 					case "ul": return block.text.split("\n").filter(Boolean).map(line => `- ${line}`).join("\n");
 					case "ol": return block.text.split("\n").filter(Boolean).map((line, index) => `${index + 1}. ${line}`).join("\n");
 					case "blockquote": return block.text.split("\n").map(line => `> ${line}`).join("\n");
@@ -1172,7 +1176,13 @@
 					const fragment = document.createDocumentFragment();
 					for (let count = 0; count < 80 && index < blocks.length; count++, index++) {
 						const block = blocks[index];
-						if (!["p", "h2", "ul", "ol", "blockquote", "table", "code", "footnote"].includes(block.type)) continue;
+						if (!["p", "h1", "h2", "h3", "toc", "ul", "ol", "blockquote", "table", "code", "footnote"].includes(block.type)) continue;
+						const startPage = Number.isInteger(block.pageNumber) ? block.pageNumber : null;
+						const endPage = Number.isInteger(block.endPageNumber) ? block.endPageNumber : startPage;
+						const markPages = element => {
+							if (startPage !== null) element.dataset.page = String(startPage);
+							if (endPage !== null && endPage !== startPage) element.dataset.endPage = String(endPage);
+						};
 						if (block.type === "table") {
 							const table = document.createElement("table");
 							const body = document.createElement("tbody");
@@ -1191,6 +1201,7 @@
 							wrapper.setAttribute("role", "region");
 							wrapper.setAttribute("aria-label", "Scrollable extracted table");
 							wrapper.tabIndex = 0;
+							markPages(wrapper);
 							wrapper.append(table);
 							fragment.append(wrapper); continue;
 						}
@@ -1198,6 +1209,7 @@
 							const pre = document.createElement("pre");
 							const code = document.createElement("code");
 							code.textContent = block.text;
+							markPages(pre);
 							pre.append(code); fragment.append(pre); continue;
 						}
 						if (block.type === "ul" || block.type === "ol") {
@@ -1208,13 +1220,17 @@
 								item.textContent = line;
 								list.append(item);
 							}
+							markPages(list);
 							fragment.append(list); continue;
 						}
-						const tag = block.type === "h2" || block.type === "blockquote" ? block.type : block.type === "footnote" ? "aside" : "p";
+						const tag = ["h1", "h2", "h3", "blockquote"].includes(block.type)
+							? block.type : block.type === "footnote" ? "aside" : "p";
 						const element = document.createElement(tag);
 						element.textContent = block.text;
-						if (tag === "p") element.className = "reader-extracted-paragraph";
+						if (block.type === "toc") element.className = "reader-toc-entry";
+						else if (tag === "p") element.className = "reader-extracted-paragraph";
 						if (block.type === "footnote") element.className = "reader-footnote";
+						markPages(element);
 						fragment.append(element);
 					}
 					readerContent.append(fragment);
@@ -1260,7 +1276,7 @@
 		}
 		function updateOutline() {
 			if (outlineObserver) outlineObserver.disconnect();
-			const headings = [...readerContent.querySelectorAll("h2")];
+			const headings = [...readerContent.querySelectorAll("h1, h2, h3")];
 			const list = $("#outline-list");
 			list.replaceChildren();
 			for (const [index, heading] of headings.entries()) {
@@ -1326,8 +1342,21 @@
 			if (state !== "reading" || pendingResumeProgress === null) return;
 			const progress = pendingResumeProgress;
 			pendingResumeProgress = null;
+			const targetPage = Math.max(1, Number(extractionResult.lastReadPage) || 1);
+			const pageBlocks = [...readerContent.querySelectorAll("[data-page]")];
+			const targetBlock = pageBlocks.find(element =>
+				Number(element.dataset.page) <= targetPage && Number(element.dataset.endPage || element.dataset.page) >= targetPage)
+				|| pageBlocks.filter(element => Number(element.dataset.page) <= targetPage).at(-1);
 			const maximum = document.documentElement.scrollHeight - window.innerHeight;
-			window.scrollTo(0, Math.max(0, maximum) * progress / 100);
+			if (progress > 0 && maximum > 0) {
+				window.scrollTo(0, maximum * progress / 100);
+			} else if (targetBlock) {
+				const offset = targetBlock.getBoundingClientRect().top + window.scrollY
+					- $("#reader-toolbar").getBoundingClientRect().height - 28;
+				window.scrollTo(0, Math.max(0, offset));
+			} else {
+				window.scrollTo(0, Math.max(0, maximum) * progress / 100);
+			}
 			updateReadingProgress();
 		}
 		function returnToResults() {
@@ -1342,12 +1371,21 @@
 			if (state !== "reading") return;
 			const max = document.documentElement.scrollHeight - window.innerHeight;
 			const percent = max <= 0 ? 0 : Math.min(100, Math.max(0, Math.round(window.scrollY / max * 100)));
+			const page = currentReaderPage();
 			$("#reader-progress-fill").style.width = `${percent}%`;
-			$("#progress-label").textContent = `${percent}% read`;
+			$("#progress-label").textContent = `Page ${page} of ${extractionResult?.pageCount || 1} · ${percent}% read`;
 			if (activeLibraryDocumentId && readerContentReady && pendingResumeProgress === null) {
 				window.clearTimeout(progressSaveTimer);
 				progressSaveTimer = window.setTimeout(() => saveReadingProgress(false), 450);
 			}
+		}
+		function currentReaderPage() {
+			const pageBlocks = [...readerContent.querySelectorAll("[data-page]")];
+			if (!pageBlocks.length) return 1;
+			const readingLine = ($("#reader-toolbar")?.getBoundingClientRect().bottom || 0) + 32;
+			const current = pageBlocks.filter(element => element.getBoundingClientRect().top <= readingLine).at(-1)
+				|| pageBlocks[0];
+			return Math.max(1, Math.min(extractionResult?.pageCount || 1, Number(current.dataset.page) || 1));
 		}
 		function saveReadingProgress(keepalive) {
 			window.clearTimeout(progressSaveTimer);
@@ -1356,7 +1394,7 @@
 			const maximum = document.documentElement.scrollHeight - window.innerHeight;
 			const progress = maximum <= 0 ? 0 : Math.min(100, Math.max(0, Math.round(window.scrollY / maximum * 100)));
 			const pageCount = Math.max(1, extractionResult.pageCount || 1);
-			const page = Math.min(pageCount, Math.max(1, Math.ceil(progress * pageCount / 100)));
+			const page = Math.min(pageCount, currentReaderPage());
 			const position = `${page}:${progress}`;
 			if (position === lastProgressSent) return;
 			lastProgressSent = position;

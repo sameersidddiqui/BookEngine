@@ -27,6 +27,8 @@ class PdfTextExtractorTest {
 		assertEquals("Example subject", result.subject());
 		assertEquals("Example creator", result.creator());
 		assertEquals("Example producer", result.producer());
+		assertTrue(result.blocks().stream().anyMatch(block -> block.pageNumber() == 1));
+		assertTrue(result.blocks().stream().anyMatch(block -> block.pageNumber() == 2));
 	}
 
 	@Test
@@ -42,7 +44,8 @@ class PdfTextExtractorTest {
 		assertTrue(result.blocks().stream().anyMatch(block ->
 				block.type().equals("ol") && block.text().equals("First step\nSecond step")));
 		assertTrue(result.blocks().stream().anyMatch(block ->
-				block.type().equals("blockquote") && block.text().contains("A quoted passage. Another quoted line.")));
+				block.type().equals("p") && block.text().contains("A quoted passage. Another quoted line.")));
+		assertFalse(result.blocks().stream().anyMatch(block -> block.type().equals("blockquote")));
 		assertTrue(result.blocks().stream().anyMatch(block ->
 				block.type().equals("table") && block.text().contains("Name\tCount\tStatus")), result.blocks().toString());
 		assertTrue(result.blocks().stream().anyMatch(block ->
@@ -59,7 +62,31 @@ class PdfTextExtractorTest {
 		assertFalse(result.text().contains("Repeated book header"));
 		assertFalse(result.text().contains("Repeated book footer"));
 		assertTrue(result.blocks().stream().allMatch(block ->
-				List.of("p", "h2", "ul", "ol", "blockquote", "table", "code", "footnote").contains(block.type())));
+				List.of("p", "h1", "h2", "h3", "toc", "ul", "ol", "blockquote", "table", "code", "footnote")
+						.contains(block.type())));
+	}
+
+	@Test
+	void reconstructsBookParagraphsContentsHeadingsAndPageAnchors() throws IOException {
+		PdfExtractionResult result = this.extractor.extract(PdfTestFixtures.bookLikePdf());
+
+		assertTrue(result.blocks().stream().anyMatch(block -> block.type().equals("toc")
+				&& block.text().equals("Chapter 1 The Beginning — 2") && block.pageNumber() == 1), result.blocks().toString());
+		assertTrue(result.blocks().stream().anyMatch(block ->
+				block.type().equals("h1") && block.text().equals("PART I") && block.pageNumber() == 2));
+		assertTrue(result.blocks().stream().anyMatch(block ->
+				block.type().equals("h2") && block.text().equals("I BEGINNINGS") && block.pageNumber() == 2),
+				result.blocks().toString());
+		assertTrue(result.blocks().stream().anyMatch(block -> block.type().equals("p")
+				&& block.text().equals("A continuous book paragraph starts here and continues on the next visual line.")),
+				result.blocks().toString());
+		assertTrue(result.blocks().stream().anyMatch(block -> block.type().equals("p")
+				&& block.text().equals("This sentence continues at the top of the next page after crossing a page boundary.")
+				&& block.pageNumber() == 2 && block.endPageNumber() == 3), result.blocks().toString());
+		assertTrue(result.blocks().stream().anyMatch(block -> block.type().equals("p")
+				&& block.text().equals("Well-known compounds stay hyphenated.")), result.blocks().toString());
+		assertTrue(result.blocks().stream().allMatch(block ->
+				block.pageNumber() >= 1 && block.endPageNumber() >= block.pageNumber()));
 	}
 
 	@Test
