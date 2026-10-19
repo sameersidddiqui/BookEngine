@@ -2,6 +2,7 @@ HELP.md
 .gradle
 build/
 application-secrets.properties
+/data/
 .env
 .env.*
 !gradle/wrapper/gradle-wrapper.jar

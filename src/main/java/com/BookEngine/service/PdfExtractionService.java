@@ -32,9 +32,13 @@ public class PdfExtractionService {
 			throw new IllegalStateException("Unable to read the uploaded file.", exception);
 		}
 
+		return extract(content, file.getOriginalFilename());
+	}
+
+	public PdfExtractionResponse extract(byte[] content, String originalFilename) {
 		PdfExtractionResult result = this.extractor.extract(content);
 		return new PdfExtractionResponse(
-				fileName(file.getOriginalFilename()),
+				fileName(originalFilename),
 				result.pageCount(),
 				new PdfMetadataResponse(
 						result.title(),

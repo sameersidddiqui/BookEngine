@@ -2,6 +2,9 @@ package com.BookEngine.exception;
 
 import com.BookEngine.dto.ApiErrorResponse;
 import com.BookEngine.extractor.PdfExtractionException;
+import com.BookEngine.service.InvalidPdfLibraryRequestException;
+import com.BookEngine.service.PdfLibraryAccessDeniedException;
+import com.BookEngine.service.PdfLibraryDocumentNotFoundException;
 import com.BookEngine.validation.InvalidPdfUploadException;
 import com.BookEngine.validation.PdfFileTooLargeException;
 import org.slf4j.Logger;
@@ -33,6 +36,23 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiErrorResponse> handleMultipartError(MultipartException exception) {
 		return ResponseEntity.badRequest()
 				.body(new ApiErrorResponse("invalid_multipart_request", "The multipart upload could not be read."));
+	}
+
+	@ExceptionHandler(InvalidPdfLibraryRequestException.class)
+	public ResponseEntity<ApiErrorResponse> handleInvalidLibraryRequest(InvalidPdfLibraryRequestException exception) {
+		return ResponseEntity.badRequest().body(new ApiErrorResponse("invalid_request", exception.getMessage()));
+	}
+
+	@ExceptionHandler(PdfLibraryDocumentNotFoundException.class)
+	public ResponseEntity<ApiErrorResponse> handleMissingLibraryDocument() {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(new ApiErrorResponse("document_not_found", "This saved PDF is no longer available."));
+	}
+
+	@ExceptionHandler(PdfLibraryAccessDeniedException.class)
+	public ResponseEntity<ApiErrorResponse> handleMissingLibrarySession() {
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+				.body(new ApiErrorResponse("library_session_required", "Initialize the PDF library session first."));
 	}
 
 	@ExceptionHandler(Exception.class)

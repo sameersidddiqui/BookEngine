@@ -149,6 +149,31 @@
 		.notice.error { border: 1px solid #dfb5ae; background: #fff2ef; color: #70241f; }
 		.notice.progress { border: 1px solid #b8cbb9; background: var(--green-soft); color: var(--ink); }
 		.notice.info { border: 1px solid var(--line); background: var(--surface-raised); color: var(--muted); }
+		.library-view { width: min(1040px, 100%); margin: clamp(36px, 6vw, 64px) auto 0; }
+		.library-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+		.library-heading h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(27px, 4vw, 36px); font-weight: 500; letter-spacing: -.035em; }
+		.library-heading p { margin: 7px 0 0; color: var(--muted); font-size: 14px; }
+		.library-status { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+		.library-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+		.library-card { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 15px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: 0 7px 24px rgb(35 51 39 / 4%); }
+		.library-card .file-badge { width: 42px; height: 46px; }
+		.library-card-info { min-width: 0; flex: 1; }
+		.library-card-name { overflow: hidden; margin: 0; font-size: 15px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+		.library-card-meta { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+		.library-card-progress { height: 3px; overflow: hidden; margin-top: 9px; border-radius: 3px; background: var(--green-soft); }
+		.library-card-progress span { display: block; height: 100%; border-radius: inherit; background: var(--green); }
+		.library-card-actions { display: flex; flex: none; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+		.library-card-actions .button { min-height: 40px; padding: 7px 10px; font-size: 13px; }
+		.library-card.unavailable { opacity: .72; }
+		.library-dialog { width: min(440px, calc(100% - 32px)); padding: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); color: var(--ink); box-shadow: 0 24px 80px rgb(15 25 18 / 28%); }
+		.library-dialog::backdrop { background: rgb(18 28 21 / 46%); backdrop-filter: blur(3px); }
+		.library-dialog form { padding: 24px; }
+		.library-dialog h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 27px; font-weight: 500; }
+		.library-dialog p { margin: 9px 0 18px; color: var(--muted); font-size: 14px; line-height: 1.55; }
+		.library-dialog label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 700; }
+		.library-dialog input { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-raised); color: var(--ink); }
+		.library-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+		.library-dialog-actions .button { min-width: 90px; }
 		.notice-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 		.progress-track { height: 4px; overflow: hidden; margin-top: 11px; border-radius: 4px; background: color-mix(in srgb, var(--green) 20%, transparent); }
 		.progress-track::after { display: block; width: 38%; height: 100%; transform: translateX(-110%); border-radius: inherit; background: var(--green); animation: indeterminate 1.4s ease-in-out infinite; content: ""; }
@@ -199,7 +224,7 @@
 		.reader-progress { position: fixed; z-index: 20; top: 0; right: 0; left: 0; height: 4px; background: transparent; }
 		.reader-progress-fill { width: 0; height: 100%; background: var(--green); transition: width .08s linear; }
 		body.reading-mode .shell { width: 100%; margin: 0; padding: 0; }
-		body.reading-mode .site-header, body.reading-mode #upload-view, body.reading-mode .results-view, body.reading-mode footer { display: none !important; }
+		body.reading-mode .site-header, body.reading-mode #upload-view, body.reading-mode #library-view, body.reading-mode .results-view, body.reading-mode footer { display: none !important; }
 		body.reading-mode .reader-document { display: block; min-height: 100vh; border: 0; border-radius: 0; }
 		.reader-toolbar { position: sticky; z-index: 10; top: max(12px, env(safe-area-inset-top)); display: flex; width: min(1120px, calc(100% - 40px)); min-height: 64px; align-items: center; gap: 12px; margin: 16px auto 0; padding: 9px 14px; border: 1px solid color-mix(in srgb, var(--line) 78%, transparent); border-radius: 18px; background: color-mix(in srgb, var(--surface) 92%, transparent); box-shadow: 0 10px 34px rgb(25 40 30 / 10%); backdrop-filter: blur(18px) saturate(1.3); }
 		.reader-title { min-width: 0; max-width: none; overflow: hidden; flex: 1; margin: 0 auto 0 0; font-size: 16px; font-weight: 650; letter-spacing: -.02em; text-overflow: ellipsis; white-space: nowrap; }
@@ -246,6 +271,13 @@
 			.reader-outline ol { display: flex; flex-wrap: wrap; gap: 5px; }
 			.reader-outline a { border-left: 0; border-bottom: 2px solid transparent; border-radius: 6px; }
 			.reader-outline a[aria-current="location"] { border-bottom-color: var(--green); }
+			.library-view { margin-top: 36px; }
+			.library-card { flex-wrap: wrap; gap: 10px; padding: 13px; }
+			.library-card-info { flex-basis: calc(100% - 56px); }
+			.library-card-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+			.library-card-actions .button { width: 100%; min-height: 42px; }
+			.library-card-actions .button.primary { grid-column: 1 / -1; }
+			.library-dialog form { padding: 21px; }
 		}
 		@media (max-width: 560px) {
 			.shell { width: calc(100% - 32px); padding-top: 16px; }
@@ -467,7 +499,7 @@
 				</section>
 			</section>
 			<section class="results-view" id="results-view" hidden aria-labelledby="results-title">
-				<div class="results-heading"><div><p class="eyebrow">Extraction complete</p><h1 id="results-title" tabindex="-1">Your text is ready.</h1><p id="results-subtitle">Review the extracted text or open it in the reader.</p></div><div class="result-actions"><button class="button" id="read-button" type="button">Read</button><button class="button" id="copy-text" type="button">Copy text</button><button class="button" id="download-text" type="button">Download .txt</button><button class="button" id="download-markdown" type="button">Download .md</button><button class="button" id="copy-markdown" type="button">Copy as Markdown</button></div></div>
+				<div class="results-heading"><div><p class="eyebrow">Extraction complete</p><h1 id="results-title" tabindex="-1">Your text is ready.</h1><p id="results-subtitle">Review the extracted text or open it in the reader.</p></div><div class="result-actions"><button class="button" id="results-library" type="button">My library</button><button class="button" id="read-button" type="button">Read</button><button class="button" id="copy-text" type="button">Copy text</button><button class="button" id="download-text" type="button">Download .txt</button><button class="button" id="download-markdown" type="button">Download .md</button><button class="button" id="copy-markdown" type="button">Copy as Markdown</button></div></div>
 				<section class="results" aria-label="Extraction results">
 					<div class="file-bar"><span class="file-badge" aria-hidden="true">PDF</span><span class="file-name" id="result-filename"></span><button class="button" id="replace-result" type="button">Replace</button><button class="button primary" id="extract-again" type="button">Extract again</button><button class="button" id="new-file" type="button">New file</button></div>
 					<div class="stats" aria-label="Text statistics"><span class="stat"><strong id="result-pages">—</strong></span><span class="stat"><strong id="word-count">0</strong> words</span><span class="stat"><strong id="char-count">0</strong> characters</span><span class="stat"><strong id="reading-time">0 min</strong> estimated reading</span></div>
@@ -488,6 +520,11 @@
 					<div class="results-footer"><p>Extracted locally · no AI or OCR</p><button class="button primary" id="reader-action" type="button">Open in reader</button></div>
 				</section>
 			</section>
+			<section class="library-view" id="library-view" aria-labelledby="library-title">
+				<div class="library-heading"><div><h2 id="library-title" tabindex="-1">Your library</h2><p>Your PDFs and reading progress, saved privately for this browser.</p></div><button class="button" id="library-refresh" type="button">Refresh</button></div>
+				<p class="library-status" id="library-status" role="status" aria-live="polite">Loading your saved PDFs…</p>
+				<ul class="library-list" id="library-list"></ul>
+			</section>
 			<section class="reader-document" id="reader-document" hidden aria-label="Reader">
 				<div class="reader-toolbar">
 					<button class="reader-control text" id="reader-back" type="button" aria-label="Return to results">← Results</button>
@@ -505,6 +542,15 @@
 				<button class="button back-to-top" id="back-to-top" type="button">Back to top</button>
 			</section>
 		</main>
+		<dialog class="library-dialog" id="library-dialog" aria-labelledby="library-dialog-title">
+			<form id="library-dialog-form">
+				<h2 id="library-dialog-title">Rename PDF</h2>
+				<p id="library-dialog-description"></p>
+				<label id="library-name-label" for="library-name">Document name</label>
+				<input id="library-name" name="fileName" maxlength="200" autocomplete="off">
+				<div class="library-dialog-actions"><button class="button" id="library-dialog-cancel" type="button">Cancel</button><button class="button primary" id="library-dialog-confirm" type="submit">Save name</button></div>
+			</form>
+		</dialog>
 		<footer><span>Iqra · Read what’s already there.</span><span>PDF text is processed locally on this service.</span></footer>
 	</div>
 	<div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -523,6 +569,7 @@
 		const notice = $("#notice");
 		const uploadView = $("#upload-view");
 		const resultsView = $("#results-view");
+		const libraryView = $("#library-view");
 		const readerDocument = $("#reader-document");
 		const extractedText = $("#extracted-text");
 		const readerContent = $("#reader-content");
@@ -539,6 +586,13 @@
 		let renderGeneration = 0;
 		let readerReturnScroll = 0;
 		let returnFocusTarget = null;
+		let libraryItems = [];
+		let activeLibraryDocumentId = null;
+		let progressSaveTimer = 0;
+		let lastProgressSent = "";
+		let progressSaveFailed = false;
+		let readerContentReady = false;
+		let pendingResumeProgress = null;
 		let showAllMetadata = false;
 		let themePreference = "auto";
 		let readerSettings = { size: 1.2 };
@@ -566,6 +620,7 @@
 			state = next;
 			uploadView.hidden = next !== "idle" && next !== "file-selected" && next !== "extracting";
 			resultsView.hidden = next !== "results";
+			libraryView.hidden = next !== "idle" && next !== "file-selected";
 			readerDocument.hidden = next !== "reading";
 			document.body.classList.toggle("reading-mode", next === "reading");
 			$("#reader-progress").hidden = next !== "reading";
@@ -631,6 +686,7 @@
 			if (!file || state === "extracting") return;
 			activeFile = null;
 			extractionResult = null;
+			activeLibraryDocumentId = null;
 			fileInput.value = "";
 			clearNotice();
 			updateFileCard(file, false);
@@ -649,7 +705,7 @@
 			}
 			activeFile = file;
 			updateFileCard(file, true);
-			$("#submit-help").textContent = "Ready when you are. Your PDF stays on this device.";
+			$("#submit-help").textContent = "Ready when you are. Your PDF will be saved in your library.";
 			announce(`${file.name} selected, ready to extract.`);
 		}
 		function clearWorkspace() {
@@ -771,6 +827,7 @@
 		}
 		function renderResult(data) {
 			extractionResult = data;
+			activeLibraryDocumentId = typeof data.documentId === "string" ? data.documentId : null;
 			$("#result-filename").textContent = data.fileName || activeFile?.name || "Uploaded PDF";
 			$("#results-subtitle").textContent = "Review, copy, download, or continue in the reader.";
 			extractedText.textContent = typeof data.text === "string" ? data.text : "";
@@ -786,6 +843,169 @@
 			setTitle("Results");
 			announce(empty ? "Extraction complete. No selectable text was found." : "Extraction complete. Results are ready.");
 			$("#results-title").focus({ preventScroll: true });
+		}
+		async function libraryRequest(path, options = {}) {
+			const response = await fetch(`/api/v1/pdfs/library${path}`, options);
+			if (response.status === 204) return null;
+			const data = await response.json().catch(() => ({}));
+			if (!response.ok) {
+				if (data.error === "document_not_found") throw new Error("This saved PDF is missing. It may have been removed from storage.");
+				if (data.error === "library_session_required") throw new Error("Your library session expired. Refresh the library and try again.");
+				throw new Error(data.message || `The library returned an error (${response.status}).`);
+			}
+			return data;
+		}
+		function renderLibrary() {
+			const list = $("#library-list");
+			const status = $("#library-status");
+			list.replaceChildren();
+			if (!libraryItems.length) {
+				status.textContent = "Your library is ready. PDFs you save will appear here.";
+				return;
+			}
+			status.textContent = `${libraryItems.length} saved ${libraryItems.length === 1 ? "PDF" : "PDFs"}`;
+			for (const item of libraryItems) {
+				const row = document.createElement("li");
+				row.className = `library-card${item.available ? "" : " unavailable"}`;
+				const badge = document.createElement("span");
+				badge.className = "file-badge";
+				badge.setAttribute("aria-hidden", "true");
+				badge.textContent = "PDF";
+				const info = document.createElement("div");
+				info.className = "library-card-info";
+				const name = document.createElement("h3");
+				name.className = "library-card-name";
+				name.textContent = item.fileName;
+				const meta = document.createElement("p");
+				meta.className = "library-card-meta";
+				if (!item.available) {
+					meta.textContent = "File missing from storage · remove this entry or restore the PDF file.";
+				} else if (item.lastReadAt) {
+					meta.textContent = `Page ${item.lastReadPage} of ${item.pageCount} · ${item.lastReadProgress}% read · Last opened ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(item.lastReadAt))}`;
+				} else {
+					meta.textContent = `${item.pageCount} ${item.pageCount === 1 ? "page" : "pages"} · Not opened yet`;
+				}
+				info.append(name, meta);
+				if (item.available) {
+					const progress = document.createElement("div");
+					progress.className = "library-card-progress";
+					progress.setAttribute("role", "progressbar");
+					progress.setAttribute("aria-label", `Reading progress for ${item.fileName}`);
+					progress.setAttribute("aria-valuemin", "0");
+					progress.setAttribute("aria-valuemax", "100");
+					progress.setAttribute("aria-valuenow", String(item.lastReadProgress));
+					const fill = document.createElement("span");
+					fill.style.width = `${item.lastReadProgress}%`;
+					progress.append(fill);
+					info.append(progress);
+				}
+				const actions = document.createElement("div");
+				actions.className = "library-card-actions";
+				if (item.available) {
+					const open = document.createElement("button");
+					open.type = "button";
+					open.className = "button primary";
+					open.textContent = item.lastReadAt ? "Continue reading" : "Open PDF";
+					open.addEventListener("click", () => openSavedDocument(item.documentId));
+					actions.append(open);
+				}
+				const rename = document.createElement("button");
+				rename.type = "button";
+				rename.className = "button";
+				rename.textContent = "Rename";
+				rename.addEventListener("click", () => openLibraryDialog("rename", item));
+				const remove = document.createElement("button");
+				remove.type = "button";
+				remove.className = "button";
+				remove.textContent = "Delete";
+				remove.addEventListener("click", () => openLibraryDialog("delete", item));
+				actions.append(rename, remove);
+				row.append(badge, info, actions);
+				list.append(row);
+			}
+		}
+		async function loadLibrary() {
+			const status = $("#library-status");
+			status.textContent = "Loading your saved PDFs…";
+			try {
+				await fetch("/api/v1/pdfs/library/session", { method: "POST" }).then(async response => {
+					if (!response.ok) throw new Error(`The library session could not be initialized (${response.status}).`);
+				});
+				libraryItems = await libraryRequest("");
+				if (!Array.isArray(libraryItems)) throw new Error("The library returned an unexpected response.");
+				renderLibrary();
+			} catch (error) {
+				console.error("Could not load the saved PDF library.", error);
+				libraryItems = [];
+				$("#library-list").replaceChildren();
+				status.textContent = error instanceof Error ? `${error.message} Use Retry to try again.` : "Your saved PDFs could not be loaded. Use Retry to try again.";
+			}
+		}
+		function openLibraryDialog(mode, item) {
+			const dialog = $("#library-dialog");
+			dialog.dataset.mode = mode;
+			dialog.dataset.documentId = item.documentId;
+			const rename = mode === "rename";
+			$("#library-dialog-title").textContent = rename ? "Rename PDF" : "Delete saved PDF?";
+			$("#library-dialog-description").textContent = rename
+				? "Choose a clear name for this document. Its saved reading progress will stay with it."
+				: `“${item.fileName}” and its saved reading position will be permanently deleted.`;
+			$("#library-name-label").hidden = !rename;
+			$("#library-name").hidden = !rename;
+			$("#library-name").value = rename ? item.fileName.replace(/\.pdf$/i, "") : "";
+			$("#library-dialog-confirm").textContent = rename ? "Save name" : "Delete PDF";
+			$("#library-dialog-confirm").classList.toggle("danger", !rename);
+			dialog.showModal();
+			if (rename) $("#library-name").focus();
+			else $("#library-dialog-confirm").focus();
+		}
+		async function submitLibraryDialog(event) {
+			event.preventDefault();
+			const dialog = $("#library-dialog");
+			const id = dialog.dataset.documentId;
+			const mode = dialog.dataset.mode;
+			const confirmButton = $("#library-dialog-confirm");
+			confirmButton.disabled = true;
+			try {
+				if (mode === "rename") {
+					await libraryRequest(`/${encodeURIComponent(id)}`, {
+						method: "PUT",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ fileName: $("#library-name").value })
+					});
+				} else {
+					await libraryRequest(`/${encodeURIComponent(id)}`, { method: "DELETE" });
+				}
+				dialog.close();
+				await loadLibrary();
+				toast(mode === "rename" ? "PDF renamed." : "PDF deleted from your library.");
+			} catch (error) {
+				console.error(`Could not ${mode} the saved PDF.`, error);
+				toast(error instanceof Error ? error.message : "The PDF library could not be updated.");
+			} finally {
+				confirmButton.disabled = false;
+			}
+		}
+		async function openSavedDocument(id) {
+			const buttons = [...$("#library-list").querySelectorAll("button")];
+			buttons.forEach(button => { button.disabled = true; });
+			$("#library-status").textContent = "Opening saved PDF…";
+			try {
+				const data = await libraryRequest(`/${encodeURIComponent(id)}`);
+				if (!data || typeof data.text !== "string" || !Array.isArray(data.blocks)) {
+					throw new Error("The saved PDF could not be opened because its data is incomplete.");
+				}
+				activeFile = null;
+				renderResult(data);
+				openReader($("#read-button"));
+			} catch (error) {
+				console.error("Could not open saved PDF.", error);
+				toast(error instanceof Error ? error.message : "The saved PDF could not be opened.");
+				await loadLibrary();
+			} finally {
+				buttons.forEach(button => { if (button.isConnected) button.disabled = false; });
+				if (state === "idle") renderLibrary();
+			}
 		}
 		function markdownFor(data) {
 			if (!Array.isArray(data.blocks) || !data.blocks.length) return data.text || "";
@@ -872,7 +1092,7 @@
 			setLoading(true);
 			requestTimer = window.setTimeout(() => controller.abort(new DOMException("Request timed out.", "TimeoutError")), requestTimeoutMs);
 			try {
-				const response = await fetch("/api/v1/pdfs/extract", { method: "POST", body: formData, signal: controller.signal });
+				const response = await fetch("/api/v1/pdfs/library", { method: "POST", body: formData, signal: controller.signal });
 				const data = await response.json().catch(() => ({}));
 				if (abortController !== controller) return;
 				if (!response.ok) {
@@ -889,6 +1109,10 @@
 				savePreference(keys.recent, JSON.stringify(recent));
 				renderRecentFiles();
 				renderResult(data);
+				await loadLibrary();
+				if (data.documentId && libraryItems.some(item => item.documentId === data.documentId && item.lastReadProgress > 0)) {
+					toast("This PDF is already in your library. Resuming your last position.");
+				}
 				if ($("#auto-open").checked && data.text.trim()) openReader($("#read-button"));
 			} catch (error) {
 				if (abortController !== controller) return;
@@ -931,6 +1155,7 @@
 		function buildReaderContent(data) {
 			renderGeneration++;
 			const generation = renderGeneration;
+			readerContentReady = false;
 			readerContent.replaceChildren();
 			const rawText = typeof data.text === "string" ? data.text : "";
 			const normalized = rawText.replace(/\r\n?/g, "\n").replace(/\f/g, "\n\n").replace(/\n[ \t]*\n(?:[ \t]*\n)+/g, "\n\n").trim();
@@ -1028,8 +1253,10 @@
 			return letters.length >= 3 && letters.every(letter => letter === letter.toLocaleUpperCase()) && !/[.!?;:]$/.test(line);
 		}
 		function finishReaderContent() {
+			readerContentReady = true;
 			updateOutline();
 			updateReadingProgress();
+			if (state === "reading") restoreReaderPosition();
 		}
 		function updateOutline() {
 			if (outlineObserver) outlineObserver.disconnect();
@@ -1082,14 +1309,29 @@
 			if (!extractionResult) return;
 			returnFocusTarget = trigger || $("#read-button");
 			readerReturnScroll = window.scrollY;
+			pendingResumeProgress = Number.isInteger(extractionResult.lastReadProgress)
+				? Math.min(100, Math.max(0, extractionResult.lastReadProgress))
+				: 0;
+			lastProgressSent = `${extractionResult.lastReadPage || 1}:${pendingResumeProgress}`;
+			progressSaveFailed = false;
 			buildReaderContent(extractionResult);
 			$("#reader-outline").open = window.matchMedia("(min-width: 561px)").matches;
 			setState("reading");
 			setTitle($("#reader-title").textContent);
 			window.scrollTo(0, 0);
 			$("#reader-title").focus({ preventScroll: true });
+			if (readerContentReady) requestAnimationFrame(restoreReaderPosition);
+		}
+		function restoreReaderPosition() {
+			if (state !== "reading" || pendingResumeProgress === null) return;
+			const progress = pendingResumeProgress;
+			pendingResumeProgress = null;
+			const maximum = document.documentElement.scrollHeight - window.innerHeight;
+			window.scrollTo(0, Math.max(0, maximum) * progress / 100);
+			updateReadingProgress();
 		}
 		function returnToResults() {
+			saveReadingProgress(true);
 			setState("results");
 			setTitle("Results");
 			window.scrollTo(0, readerReturnScroll);
@@ -1099,9 +1341,50 @@
 		function updateReadingProgress() {
 			if (state !== "reading") return;
 			const max = document.documentElement.scrollHeight - window.innerHeight;
-			const percent = max <= 0 ? 100 : Math.min(100, Math.max(0, Math.round(window.scrollY / max * 100)));
+			const percent = max <= 0 ? 0 : Math.min(100, Math.max(0, Math.round(window.scrollY / max * 100)));
 			$("#reader-progress-fill").style.width = `${percent}%`;
 			$("#progress-label").textContent = `${percent}% read`;
+			if (activeLibraryDocumentId && readerContentReady && pendingResumeProgress === null) {
+				window.clearTimeout(progressSaveTimer);
+				progressSaveTimer = window.setTimeout(() => saveReadingProgress(false), 450);
+			}
+		}
+		function saveReadingProgress(keepalive) {
+			window.clearTimeout(progressSaveTimer);
+			if (state !== "reading" || !activeLibraryDocumentId || !extractionResult
+					|| !readerContentReady || pendingResumeProgress !== null) return;
+			const maximum = document.documentElement.scrollHeight - window.innerHeight;
+			const progress = maximum <= 0 ? 0 : Math.min(100, Math.max(0, Math.round(window.scrollY / maximum * 100)));
+			const pageCount = Math.max(1, extractionResult.pageCount || 1);
+			const page = Math.min(pageCount, Math.max(1, Math.ceil(progress * pageCount / 100)));
+			const position = `${page}:${progress}`;
+			if (position === lastProgressSent) return;
+			lastProgressSent = position;
+			fetch(`/api/v1/pdfs/library/${encodeURIComponent(activeLibraryDocumentId)}/progress`, {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ page, progress }),
+				keepalive
+			}).then(async response => {
+				if (!response.ok) {
+					const data = await response.json().catch(() => ({}));
+					throw new Error(data.message || `The library returned an error (${response.status}).`);
+				}
+				const saved = libraryItems.find(item => item.documentId === activeLibraryDocumentId);
+				if (saved) {
+					saved.lastReadPage = page;
+					saved.lastReadProgress = progress;
+					saved.lastReadAt = new Date().toISOString();
+					saved.updatedAt = saved.lastReadAt;
+					renderLibrary();
+				}
+				progressSaveFailed = false;
+			}).catch(error => {
+				console.error("Could not save PDF reading progress.", error);
+				if (!progressSaveFailed) toast("Reading progress could not be saved. Check your connection.");
+				progressSaveFailed = true;
+				lastProgressSent = "";
+			});
 		}
 		function renderRecentFiles() {
 			const names = loadRecentFiles();
@@ -1140,6 +1423,13 @@
 		$("#read-button").addEventListener("click", event => openReader(event.currentTarget));
 		$("#reader-action").addEventListener("click", event => openReader(event.currentTarget));
 		$("#reader-back").addEventListener("click", returnToResults);
+		$("#results-library").addEventListener("click", () => {
+			clearWorkspace();
+			$("#library-title").scrollIntoView({ behavior: "smooth", block: "start" });
+		});
+		$("#library-refresh").addEventListener("click", loadLibrary);
+		$("#library-dialog-form").addEventListener("submit", submitLibraryDialog);
+		$("#library-dialog-cancel").addEventListener("click", () => $("#library-dialog").close());
 		$("#new-file").addEventListener("click", clearWorkspace);
 		$("#empty-new-file").addEventListener("click", clearWorkspace);
 		$("#health-retry").addEventListener("click", checkHealth);
@@ -1169,6 +1459,7 @@
 		$("#back-to-top").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 		window.addEventListener("scroll", updateReadingProgress, { passive: true });
 		window.addEventListener("resize", updateReadingProgress);
+		window.addEventListener("pagehide", () => saveReadingProgress(true));
 		document.addEventListener("keydown", event => {
 			const target = event.target;
 			const typing = target instanceof HTMLElement && (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) || target.isContentEditable);
@@ -1224,6 +1515,7 @@
 		if (!["auto", "light", "sepia", "dark"].includes(themePreference)) themePreference = "auto";
 		applyTheme(themePreference);
 		setState("idle");
+		loadLibrary();
 		checkHealth();
 	</script>
 </body>
