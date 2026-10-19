@@ -38,6 +38,30 @@ Open `http://localhost:8080/` in a browser to upload a PDF, inspect the
 extracted text and metadata, copy or download the text, or read the extracted
 text in the built-in reader.
 
+## Build and run with Docker
+
+Build the production image from the repository root:
+
+```sh
+docker build -t bookengine .
+```
+
+Run it locally on port 8080:
+
+```sh
+docker run --rm -p 8080:8080 -e PORT=8080 bookengine
+```
+
+The runtime image uses Java 21 and a non-root user. It listens on the `PORT`
+environment variable (default `10000`), as expected by Render. `.dockerignore`
+keeps local build outputs, environment files, and secret/credential files out
+of the build context. Supply any deployment-specific settings through
+environment variables rather than storing credentials in the repository.
+
+On Render, create a Docker web service from the `main` branch and use the
+repository root as its Docker build context. Render supplies `PORT` to the
+container at runtime.
+
 ## Extract a PDF
 
 Send a PDF as multipart form data using the field name `file`:
