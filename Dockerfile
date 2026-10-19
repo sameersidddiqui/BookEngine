@@ -5,6 +5,7 @@ WORKDIR /workspace
 COPY --chown=gradle:gradle gradlew build.gradle settings.gradle ./
 COPY --chown=gradle:gradle gradle ./gradle
 COPY --chown=gradle:gradle src ./src
+USER root
 RUN mkdir -p /workspace/package \
 	&& chown -R gradle:gradle /workspace
 USER gradle
