@@ -5,11 +5,12 @@ WORKDIR /workspace
 COPY --chown=gradle:gradle gradlew build.gradle settings.gradle ./
 COPY --chown=gradle:gradle gradle ./gradle
 COPY --chown=gradle:gradle src ./src
+RUN mkdir -p /workspace/package \
+	&& chown -R gradle:gradle /workspace
 USER gradle
 RUN chmod +x gradlew
 
 RUN ./gradlew --no-daemon clean bootJar \
-	&& mkdir -p /workspace/package \
 	&& jar="$(find /workspace/build/libs -maxdepth 1 -type f -name '*.jar' ! -name '*-plain.jar' -print -quit)" \
 	&& test -n "$jar" \
 	&& cp "$jar" /workspace/package/app.jar
