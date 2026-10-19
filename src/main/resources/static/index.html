@@ -1,0 +1,1267 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#f5f3ee">
+	<title>Iqra | PDF Text Extraction Workspace</title>
+	<style>
+		:root {
+			color-scheme: light;
+			--ink: #202923;
+			--muted: #66736b;
+			--paper: #f5f3ee;
+			--surface: #fffefa;
+			--line: #e4e5dc;
+			--green: #245c43;
+			--green-dark: #194832;
+			--green-soft: #eaf1e9;
+			--orange: #c66d3c;
+			--red: #a63832;
+			--shadow: 0 20px 60px rgb(35 51 39 / 8%);
+			font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			margin: 0;
+			min-width: 320px;
+			background:
+				radial-gradient(ellipse at 80% -10%, rgb(218 229 212 / 75%), transparent 42rem),
+				var(--paper);
+			color: var(--ink);
+		}
+
+		button, input { font: inherit; }
+		button:focus-visible, a:focus-visible, input:focus-visible + .upload-area {
+			outline: 3px solid #8db89b;
+			outline-offset: 3px;
+		}
+
+		.shell {
+			width: min(1120px, calc(100% - 48px));
+			margin: 0 auto;
+			padding: 30px 0 64px;
+		}
+
+		header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 68px;
+		}
+
+		.brand {
+			display: inline-flex;
+			align-items: center;
+			gap: 11px;
+			color: var(--ink);
+			font-size: 17px;
+			font-weight: 750;
+			letter-spacing: -.04em;
+			text-decoration: none;
+		}
+
+		.brand-mark {
+			display: grid;
+			width: 36px;
+			height: 36px;
+			place-items: center;
+			border-radius: 11px;
+			background: var(--green);
+			color: white;
+		}
+
+		.brand-mark svg { width: 20px; height: 20px; }
+		.brand-description {
+			display: block;
+			margin-top: 2px;
+			color: var(--muted);
+			font-size: 9px;
+			font-weight: 600;
+			letter-spacing: .01em;
+		}
+
+		.health {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			padding: 8px 12px;
+			border: 1px solid var(--line);
+			border-radius: 999px;
+			background: rgb(255 254 250 / 72%);
+			color: var(--muted);
+			font-size: 12px;
+			font-weight: 650;
+		}
+
+		.health-dot {
+			width: 8px;
+			height: 8px;
+			border-radius: 50%;
+			background: #bd8a36;
+		}
+
+		.health[data-state="up"] .health-dot { background: #3c9a62; }
+		.health[data-state="down"] .health-dot { background: var(--red); }
+
+		.hero {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(380px, .9fr);
+			align-items: center;
+			gap: clamp(36px, 7vw, 88px);
+		}
+
+		.eyebrow {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			margin: 0 0 18px;
+			color: var(--green);
+			font-size: 11px;
+			font-weight: 800;
+			letter-spacing: .14em;
+			text-transform: uppercase;
+		}
+
+		.eyebrow::before {
+			width: 18px;
+			height: 1px;
+			background: var(--orange);
+			content: "";
+		}
+
+		h1 {
+			max-width: 580px;
+			margin: 0;
+			font-family: Georgia, "Times New Roman", serif;
+			font-size: clamp(48px, 6.6vw, 78px);
+			font-weight: 500;
+			letter-spacing: -.065em;
+			line-height: .98;
+		}
+
+		h1 span { color: var(--green); font-style: italic; }
+
+		.intro {
+			max-width: 465px;
+			margin: 24px 0 0;
+			color: var(--muted);
+			font-size: 16px;
+			line-height: 1.7;
+		}
+
+		.feature-list {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px 18px;
+			margin: 28px 0 0;
+			padding: 0;
+			color: #46534b;
+			font-size: 12px;
+			font-weight: 650;
+			list-style: none;
+		}
+
+		.feature-list li { display: flex; align-items: center; gap: 7px; }
+		.feature-list svg { width: 15px; height: 15px; color: var(--green); }
+
+		.panel {
+			overflow: hidden;
+			border: 1px solid rgb(228 229 220 / 90%);
+			border-radius: 20px;
+			background: var(--surface);
+			box-shadow: var(--shadow);
+		}
+
+		.panel-heading {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 16px;
+			padding: 25px 26px 20px;
+		}
+
+		.panel-heading h2 {
+			margin: 0;
+			font-size: 16px;
+			letter-spacing: -.025em;
+		}
+
+		.panel-heading p {
+			margin: 6px 0 0;
+			color: var(--muted);
+			font-size: 12px;
+		}
+
+		.file-limit {
+			flex: none;
+			padding: 6px 9px;
+			border-radius: 7px;
+			background: var(--green-soft);
+			color: var(--green);
+			font-size: 10px;
+			font-weight: 750;
+		}
+
+		.upload-area {
+			display: flex;
+			min-height: 184px;
+			margin: 0 24px;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 22px;
+			border: 1px dashed #cbd3c7;
+			border-radius: 13px;
+			background: #fafbf7;
+			text-align: center;
+			transition: background .16s ease, border-color .16s ease, transform .16s ease;
+		}
+
+		.upload-area.dragging {
+			transform: scale(1.01);
+			border-color: var(--green);
+			background: var(--green-soft);
+		}
+
+		.upload-icon {
+			display: grid;
+			width: 44px;
+			height: 44px;
+			margin-bottom: 13px;
+			place-items: center;
+			border: 1px solid #e2e8de;
+			border-radius: 13px;
+			background: white;
+			color: var(--green);
+		}
+
+		.upload-icon svg { width: 21px; height: 21px; }
+		.upload-area strong { font-size: 13px; }
+
+		.upload-area p {
+			margin: 6px 0 0;
+			color: var(--muted);
+			font-size: 11px;
+		}
+
+		.browse {
+			margin-top: 12px;
+			padding: 0;
+			border: 0;
+			background: transparent;
+			color: var(--green);
+			cursor: pointer;
+			font-size: 12px;
+			font-weight: 750;
+			text-decoration: underline;
+			text-underline-offset: 3px;
+		}
+
+		#file-input {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip: rect(0, 0, 0, 0);
+			white-space: nowrap;
+			clip-path: inset(50%);
+		}
+
+		#file-input:focus-visible + .upload-area { outline: 3px solid #8db89b; outline-offset: 3px; }
+
+		.selected-file {
+			display: none;
+			align-items: center;
+			gap: 11px;
+			margin: 14px 24px 0;
+			padding: 11px 12px;
+			border: 1px solid var(--line);
+			border-radius: 10px;
+			background: white;
+		}
+
+		.selected-file.visible { display: flex; }
+		.selected-file.invalid { border-color: #efd3cf; background: #fff8f6; }
+
+		.file-badge {
+			display: grid;
+			width: 34px;
+			height: 38px;
+			flex: none;
+			place-items: center;
+			border-radius: 7px;
+			background: #fbede6;
+			color: #ae5633;
+			font-size: 9px;
+			font-weight: 850;
+		}
+
+		.file-info { min-width: 0; flex: 1; }
+		.file-name { overflow: hidden; font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+		.file-size { margin-top: 3px; color: var(--muted); font-size: 10px; }
+		.file-type { color: var(--muted); font-size: 10px; }
+
+		.remove-file {
+			display: grid;
+			width: 30px;
+			height: 30px;
+			flex: none;
+			place-items: center;
+			border: 0;
+			border-radius: 7px;
+			background: transparent;
+			color: var(--muted);
+			cursor: pointer;
+		}
+
+		.remove-file:hover { background: #f3f3ef; color: var(--ink); }
+		.remove-file svg { width: 16px; height: 16px; }
+
+		.submit-row { padding: 18px 24px 24px; }
+		.submit-row { display: grid; gap: 8px; }
+		.submit-button {
+			display: inline-flex;
+			width: 100%;
+			min-height: 46px;
+			align-items: center;
+			justify-content: center;
+			gap: 9px;
+			border: 0;
+			border-radius: 10px;
+			background: var(--green);
+			color: white;
+			cursor: pointer;
+			font-size: 13px;
+			font-weight: 750;
+			transition: background .16s ease, transform .16s ease;
+		}
+
+		.submit-button:hover:not(:disabled) { transform: translateY(-1px); background: var(--green-dark); }
+		.submit-button:disabled { cursor: not-allowed; opacity: .5; }
+		.submit-button svg { width: 17px; height: 17px; }
+
+		.spinner {
+			display: none;
+			width: 16px;
+			height: 16px;
+			border: 2px solid rgb(255 255 255 / 40%);
+			border-top-color: white;
+			border-radius: 50%;
+			animation: spin .7s linear infinite;
+		}
+
+		.loading .spinner { display: inline-block; }
+		.loading .submit-icon { display: none; }
+		@keyframes spin { to { transform: rotate(360deg); } }
+
+		.notice {
+			display: none;
+			margin: 0 24px 20px;
+			padding: 11px 13px;
+			border-radius: 9px;
+			font-size: 12px;
+			line-height: 1.5;
+		}
+
+		.notice.visible { display: block; }
+		.notice.error { border: 1px solid #efd3cf; background: #fff5f3; color: #8f302b; }
+		.notice.success { border: 1px solid #d3e5d6; background: #f1f8f0; color: #285c3a; }
+
+		.results {
+			display: none;
+			margin-top: 24px;
+			border: 1px solid var(--line);
+			border-radius: 14px;
+			background: white;
+		}
+
+		.results.visible { display: block; }
+		.reader-document {
+			display: none;
+			margin-top: 24px;
+			border: 1px solid var(--line);
+			border-radius: 14px;
+			background: white;
+		}
+		.reader-document.visible { display: block; }
+		.reader-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid var(--line); }
+		.reader-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+		.reader-content { width: min(100%, 760px); margin: 0 auto; padding: 36px clamp(20px, 6vw, 72px) 56px; color: #303832; font-family: Georgia, "Times New Roman", serif; font-size: 18px; line-height: 1.85; overflow-wrap: anywhere; }
+		.reader-content h1, .reader-content h2, .reader-content h3, .reader-content h4, .reader-content h5, .reader-content h6 { max-width: none; margin: 1.7em 0 .65em; color: var(--ink); font-family: Georgia, "Times New Roman", serif; font-size: 1.45em; font-style: normal; font-weight: 600; letter-spacing: -.025em; line-height: 1.25; }
+		.reader-content > :first-child { margin-top: 0; }
+		.reader-content h1 { font-size: 1.9em; }
+		.reader-content p { margin: 0 0 1.15em; }
+		.reader-content .reader-extracted-paragraph { white-space: pre-line; }
+		.reader-content ul, .reader-content ol { margin: 0 0 1.15em; padding-left: 1.4em; }
+		.reader-content li { padding-left: .2em; }
+		.reader-content table { width: 100%; margin: 0 0 1.4em; border-collapse: collapse; font: .88em/1.5 ui-monospace, monospace; }
+		.reader-content td { padding: .45em .6em; border: 1px solid var(--line); vertical-align: top; white-space: pre-wrap; }
+		.reader-content pre { overflow-x: auto; margin: 0 0 1.2em; padding: 1em; border-radius: 8px; background: #f0efe9; font-size: .84em; line-height: 1.55; }
+		.reader-content .reader-footnote { margin: 1.2em 0; color: #72766d; font-size: .82em; line-height: 1.55; }
+		.reader-content blockquote {
+			margin: 0 0 1.15em;
+			padding: .1em 0 .1em 1.1em;
+			border-left: 3px solid #9caf9b;
+			color: #58645b;
+			font-style: italic;
+		}
+		body.reading-mode {
+			background: #f7f5ef;
+			color: #302f2a;
+		}
+		.reading-mode .shell { width: 100%; margin: 0; padding: 0; }
+		.reading-mode .shell > header,
+		.reading-mode .shell > footer,
+		.reading-mode .shell > main { display: none !important; }
+		.reading-mode .reader-document {
+			display: block;
+			min-height: 100vh;
+			margin: 0;
+			border: 0;
+			border-radius: 0;
+			background: transparent;
+		}
+		.reading-mode .reader-toolbar {
+			position: sticky;
+			z-index: 5;
+			top: 0;
+			min-height: 60px;
+			padding: 8px clamp(16px, 4vw, 40px);
+			border: 0;
+			border-bottom: 1px solid rgb(73 69 58 / 10%);
+			background: rgb(247 245 239 / 94%);
+			backdrop-filter: blur(12px);
+		}
+		.reader-controls { display: flex; align-items: center; gap: 6px; }
+		.reader-control {
+			display: inline-grid;
+			min-width: 40px;
+			min-height: 40px;
+			place-items: center;
+			padding: 0 10px;
+			border: 1px solid transparent;
+			border-radius: 8px;
+			background: transparent;
+			color: #514f48;
+			cursor: pointer;
+			font-size: 13px;
+			font-weight: 600;
+		}
+		.reader-control:hover, .reader-outline[open] > summary { background: rgb(73 69 58 / 7%); }
+		.reader-control:focus-visible { outline: 3px solid #8db89b; outline-offset: 2px; }
+		.reader-back { margin-right: 8px; color: #4f584d; }
+		.reader-document-meta {
+			min-width: 0;
+			margin-right: auto;
+			overflow: hidden;
+			color: #77766e;
+			font-size: 12px;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+		.reader-outline { position: relative; }
+		.reader-outline > summary { list-style: none; cursor: pointer; }
+		.reader-outline > summary::-webkit-details-marker { display: none; }
+		.reader-outline-nav {
+			position: absolute;
+			top: calc(100% + 8px);
+			right: 0;
+			width: min(320px, calc(100vw - 32px));
+			max-height: min(65vh, 480px);
+			overflow: auto;
+			padding: 8px;
+			border: 1px solid #e2dfd5;
+			border-radius: 10px;
+			background: #fffefa;
+			box-shadow: 0 12px 36px rgb(35 34 28 / 14%);
+		}
+		.reader-outline-nav:empty { display: none; }
+		.reader-outline-nav a {
+			display: block;
+			padding: 8px 10px;
+			border-radius: 6px;
+			color: #45453f;
+			font-size: 13px;
+			line-height: 1.4;
+			text-decoration: none;
+		}
+		.reader-outline-nav a:hover { background: #f2f0e9; }
+		.reader-outline-nav a[data-level="1"] { font-weight: 700; }
+		.reader-outline-nav a[data-level="3"],
+		.reader-outline-nav a[data-level="4"],
+		.reader-outline-nav a[data-level="5"],
+		.reader-outline-nav a[data-level="6"] { padding-left: 22px; }
+		.reading-mode .reader-content {
+			width: min(100%, 48rem);
+			margin: 0 auto;
+			padding: clamp(32px, 6vh, 64px) clamp(22px, 6vw, 56px) 96px;
+			color: #35352f;
+			font-size: 1.15rem;
+			line-height: 1.82;
+		}
+		.reading-mode .reader-content h1,
+		.reading-mode .reader-content h2,
+		.reading-mode .reader-content h3,
+		.reading-mode .reader-content h4,
+		.reading-mode .reader-content h5,
+		.reading-mode .reader-content h6 { scroll-margin-top: 84px; }
+		.reading-mode .reader-content p { margin-bottom: 1.25em; }
+		.reader-empty { color: #77766e; font-style: italic; }
+		.reading-mode.reader-dark { background: #222522; color: #e8e5dc; }
+		.reader-dark .reader-toolbar { border-bottom-color: rgb(235 230 216 / 12%); background: rgb(34 37 34 / 94%); }
+		.reader-dark .reader-control { color: #e1dfd5; }
+		.reader-dark .reader-document-meta,
+		.reader-dark .reader-empty { color: #b9b7ad; }
+		.reader-dark .reader-control:hover,
+		.reader-dark .reader-outline[open] > summary { background: rgb(235 230 216 / 10%); }
+		.reader-dark .reader-outline-nav { border-color: #494b45; background: #30332f; }
+		.reader-dark .reader-outline-nav a { color: #e1dfd5; }
+		.reader-dark .reader-outline-nav a:hover { background: #41443e; }
+		.reader-dark .reader-content { color: #e8e5dc; }
+		.reader-dark .reader-content td { border-color: #494b45; }
+		.reader-dark .reader-content pre { background: #30332f; }
+		.reader-dark .reader-content .reader-footnote { color: #b9b7ad; }
+		.reader-dark .reader-content blockquote { border-left-color: #819982; color: #c2c7bd; }
+		.reader-dark .reader-content h1,
+		.reader-dark .reader-content h2,
+		.reader-dark .reader-content h3,
+		.reader-dark .reader-content h4,
+		.reader-dark .reader-content h5,
+		.reader-dark .reader-content h6 { color: #f0ede4; }
+
+		.result-top {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			padding: 15px 17px;
+			border-bottom: 1px solid var(--line);
+		}
+
+		.result-title { font-size: 12px; font-weight: 750; }
+		.page-count { color: var(--muted); font-size: 11px; }
+		.result-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 7px; }
+		.result-action {
+			padding: 6px 9px;
+			border: 1px solid var(--line);
+			border-radius: 7px;
+			background: white;
+			color: var(--green);
+			cursor: pointer;
+			font-size: 10px;
+			font-weight: 700;
+		}
+		.result-action.primary {
+			padding: 11px 20px;
+			border-color: var(--green);
+			border-radius: 9px;
+			background: var(--green);
+			color: white;
+			font-size: 14px;
+			font-weight: 750;
+		}
+		.result-action.primary:hover:not(:disabled) {
+			border-color: var(--green-dark);
+			background: var(--green-dark);
+		}
+		.result-action:hover:not(:disabled) { background: var(--green-soft); }
+		.result-action:disabled { cursor: not-allowed; opacity: .45; }
+		.result-action.clear { color: var(--muted); }
+
+		.metadata {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 13px 18px;
+			padding: 16px 17px;
+			border-bottom: 1px solid var(--line);
+		}
+
+		.metadata div { min-width: 0; }
+		.metadata dt { margin-bottom: 4px; color: var(--muted); font-size: 9px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+		.metadata dd { overflow: hidden; margin: 0; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+		.metadata dd.missing { color: #9ca49d; font-style: italic; }
+
+		.text-heading {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 14px 17px 8px;
+		}
+
+		.text-heading h3 { margin: 0; font-size: 11px; }
+		.empty-state {
+			margin: 0 24px 24px;
+			padding: 22px 16px;
+			border: 1px solid var(--line);
+			border-radius: 12px;
+			background: #fafbf7;
+			color: var(--muted);
+			text-align: center;
+		}
+		.empty-state strong { display: block; color: var(--ink); font-size: 12px; }
+		.empty-state p { margin: 6px 0 0; font-size: 11px; line-height: 1.5; }
+		.empty-state.hidden { display: none; }
+		.action-feedback { min-height: 18px; margin: 0 17px 12px; color: var(--green); font-size: 10px; }
+		.action-feedback:empty { display: none; }
+
+		.extracted-text {
+			max-height: 230px;
+			overflow: auto;
+			margin: 0;
+			padding: 0 17px 17px;
+			color: #46534b;
+			font-family: inherit;
+			font-size: 11px;
+			line-height: 1.65;
+			white-space: pre-wrap;
+			overflow-wrap: anywhere;
+		}
+
+		.empty-text { color: var(--muted); font-style: italic; }
+
+		.footnote {
+			display: flex;
+			align-items: flex-start;
+			gap: 9px;
+			max-width: 480px;
+			margin: 26px 0 0;
+			color: #737e76;
+			font-size: 11px;
+			line-height: 1.55;
+		}
+
+		.footnote svg { width: 15px; height: 15px; flex: none; margin-top: 1px; color: var(--orange); }
+
+		footer {
+			display: flex;
+			justify-content: space-between;
+			gap: 16px;
+			margin-top: 72px;
+			padding-top: 18px;
+			border-top: 1px solid var(--line);
+			color: #7b857d;
+			font-size: 10px;
+		}
+
+		footer a { color: var(--green); text-decoration: none; }
+		footer a:hover { text-decoration: underline; }
+
+		@media (max-width: 800px) {
+			header { margin-bottom: 48px; }
+			.hero { grid-template-columns: 1fr; gap: 36px; max-width: 600px; margin: 0 auto; }
+			.intro { max-width: 520px; }
+			footer { margin-top: 48px; }
+		}
+
+		@media (max-width: 480px) {
+			.shell { width: min(100% - 32px, 440px); padding-top: 18px; }
+			header { margin-bottom: 38px; }
+			h1 { font-size: 53px; }
+			.intro { font-size: 14px; }
+			.panel-heading { padding: 20px 18px 16px; }
+			.upload-area { margin: 0 16px; }
+			.selected-file { margin-right: 16px; margin-left: 16px; }
+			.submit-row { padding-right: 16px; padding-left: 16px; }
+			.notice { margin-right: 16px; margin-left: 16px; }
+			.metadata { gap: 12px; padding-right: 14px; padding-left: 14px; }
+			footer { flex-direction: column; }
+			.result-top { align-items: flex-start; flex-direction: column; }
+			.result-actions { justify-content: flex-start; }
+			.reader-toolbar { align-items: center; flex-wrap: wrap; gap: 4px; }
+			.reader-control { min-width: 44px; min-height: 44px; padding: 0 8px; }
+			.reading-mode .reader-toolbar { padding-right: 8px; padding-left: 8px; }
+			.reader-controls { gap: 2px; }
+			.reader-back { margin-right: 0; padding: 0 4px; font-size: 12px; }
+			.reader-document-meta {
+				display: block;
+				flex: 0 0 100%;
+				order: 1;
+				margin: -2px 0 0;
+				padding-left: 4px;
+				font-size: 11px;
+			}
+			.reader-outline > summary { padding: 0 7px; font-size: 12px; }
+			.reading-mode .reader-content { padding-top: 30px; font-size: 1.08rem; }
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			*, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+		}
+	</style>
+</head>
+<body>
+	<div class="shell">
+		<header>
+			<a class="brand" href="/" aria-label="Iqra home">
+				<span class="brand-mark" aria-hidden="true">
+					<svg viewBox="0 0 24 24" fill="none">
+						<path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v16H7.5A2.5 2.5 0 0 0 5 21.5v-16Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+						<path d="M5 6v15m4-14h6m-6 4h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+					</svg>
+				</span>
+				<span>
+					Iqra
+					<span class="brand-description">PDF Text Extraction Workspace</span>
+				</span>
+			</a>
+			<div class="health" id="health-status" data-state="checking" role="status" aria-live="polite">
+				<span class="health-dot" aria-hidden="true"></span>
+				<span id="health-label">Checking API</span>
+			</div>
+		</header>
+
+		<main class="hero">
+			<section aria-labelledby="page-title">
+				<p class="eyebrow">PDF text extraction</p>
+				<h1 id="page-title">A little more <span>between</span> the pages.</h1>
+				<p class="intro">
+					Drop in a PDF and bring its text and document details into the light.
+					Everything is processed locally by Iqra.
+				</p>
+				<ul class="feature-list" aria-label="Supported extraction features">
+					<li>
+						<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+						Full text
+					</li>
+					<li>
+						<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+						Page count
+					</li>
+					<li>
+						<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+						PDF metadata
+					</li>
+				</ul>
+				<p class="footnote">
+					<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.5 18 17H2L10 2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 7v4m0 2.5v.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+					Scanned image-only PDFs need OCR, which is not included. Text extraction works with PDFs that contain a selectable text layer.
+				</p>
+			</section>
+
+			<section class="panel" aria-labelledby="upload-title">
+				<div class="panel-heading">
+					<div>
+						<h2 id="upload-title">Try a document</h2>
+						<p>Choose a PDF to see what’s inside.</p>
+					</div>
+					<span class="file-limit">Maximum 10 MB</span>
+				</div>
+
+				<form id="upload-form">
+					<input id="file-input" name="file" type="file" accept=".pdf,application/pdf" aria-label="Choose a PDF file">
+					<label class="upload-area" id="drop-area" for="file-input">
+						<span class="upload-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="none">
+								<path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</span>
+						<strong>Drag a PDF here</strong>
+						<p>or choose one from your device</p>
+						<span class="browse">Browse files</span>
+					</label>
+
+					<div class="selected-file" id="selected-file" aria-live="polite">
+						<span class="file-badge" aria-hidden="true">PDF</span>
+						<div class="file-info">
+							<div class="file-name" id="file-name"></div>
+							<div class="file-size" id="file-size"></div>
+							<div class="file-type" id="file-type"></div>
+						</div>
+						<button class="remove-file" id="remove-file" type="button" aria-label="Remove selected file">
+							<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+						</button>
+					</div>
+
+					<div class="notice" id="notice" role="status" aria-live="polite"></div>
+
+					<div class="submit-row">
+						<button class="submit-button" id="submit-button" type="submit" disabled>
+							<span class="spinner" aria-hidden="true"></span>
+							<svg class="submit-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 14V3m0 0L6 7m4-4 4 4M4 12v3.5A1.5 1.5 0 0 0 5.5 17h9a1.5 1.5 0 0 0 1.5-1.5V12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+							<span id="button-label">Extract text only</span>
+						</button>
+					</div>
+				</form>
+
+				<div class="empty-state" id="empty-state">
+					<strong>Your extraction results will appear here</strong>
+					<p>Choose a PDF to extract and read its text.</p>
+				</div>
+
+				<section class="results" id="results" aria-label="Extraction results" aria-live="polite">
+					<div class="result-top">
+						<div class="result-title" id="result-filename"></div>
+						<div class="result-actions">
+							<div class="page-count" id="result-pages"></div>
+							<button class="result-action primary" id="read-extracted-button" type="button">Read</button>
+							<button class="result-action" id="copy-button" type="button" disabled>Copy text</button>
+							<button class="result-action" id="download-button" type="button" disabled>Download .txt</button>
+							<button class="result-action clear" id="clear-button" type="button">Clear</button>
+						</div>
+					</div>
+					<dl class="metadata" id="metadata"></dl>
+					<div class="text-heading">
+						<h3>Extracted text</h3>
+					</div>
+					<pre class="extracted-text" id="extracted-text"></pre>
+					<p class="action-feedback" id="action-feedback" role="status" aria-live="polite"></p>
+				</section>
+
+			</section>
+		</main>
+
+		<section class="reader-document" id="reader-document" aria-label="Document reader">
+			<div class="reader-toolbar">
+				<button class="reader-control reader-back" id="reader-back" type="button">← Upload</button>
+				<div class="reader-document-meta" id="reader-document-meta"></div>
+				<div class="reader-controls" aria-label="Reading controls">
+					<details class="reader-outline" id="reader-outline">
+						<summary class="reader-control" aria-label="Open document outline">Contents</summary>
+						<nav class="reader-outline-nav" id="reader-outline-nav" aria-label="Document outline"></nav>
+					</details>
+					<button class="reader-control" id="reader-smaller" type="button" aria-label="Decrease text size">A−</button>
+					<button class="reader-control" id="reader-larger" type="button" aria-label="Increase text size">A+</button>
+					<button class="reader-control" id="reader-theme" type="button" aria-label="Switch to dark theme" aria-pressed="false">◐</button>
+				</div>
+			</div>
+			<article class="reader-content" id="reader-content"></article>
+		</section>
+
+		<footer>
+			<span>Iqra · PDF text extraction workspace.</span>
+			<a href="/api/v1/pdfs/health" target="_blank" rel="noreferrer">Service status ↗</a>
+		</footer>
+	</div>
+
+	<script>
+		const form = document.querySelector("#upload-form");
+		const fileInput = document.querySelector("#file-input");
+		const dropArea = document.querySelector("#drop-area");
+		const selectedFile = document.querySelector("#selected-file");
+		const submitButton = document.querySelector("#submit-button");
+		const buttonLabel = document.querySelector("#button-label");
+		const notice = document.querySelector("#notice");
+		const results = document.querySelector("#results");
+		const emptyState = document.querySelector("#empty-state");
+		const readerDocument = document.querySelector("#reader-document");
+		const readerContent = document.querySelector("#reader-content");
+		const healthStatus = document.querySelector("#health-status");
+		const healthLabel = document.querySelector("#health-label");
+		const maximumFileSize = 10 * 1024 * 1024;
+		let activeFile = null;
+		let extractedText = "";
+		let resultFileName = "";
+		let extractionResult = null;
+		let readerFontSize = 1.15;
+		let inFlight = false;
+
+		function formatSize(bytes) {
+			if (bytes < 1024) return `${bytes} B`;
+			if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+			return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+		}
+
+		function showNotice(message, kind) {
+			notice.textContent = message;
+			notice.className = `notice visible ${kind}`;
+		}
+
+		function clearNotice() {
+			notice.textContent = "";
+			notice.className = "notice";
+		}
+
+		function resetReaderContent() {
+			readerContent.replaceChildren();
+			document.querySelector("#reader-document-meta").textContent = "";
+			document.querySelector("#reader-outline-nav").replaceChildren();
+			document.querySelector("#reader-outline").hidden = true;
+		}
+
+		function isConservativeHeading(text) {
+			const line = text.trim();
+			if (!line || line.includes("\n") || line.length > 100) return false;
+			if (/^(chapter|part|section)\s+(?:[ivxlcdm]+|\d+)\b/i.test(line)) return true;
+			const letters = line.match(/\p{L}/gu) || [];
+			return letters.length >= 3 && letters.every(letter => letter === letter.toLocaleUpperCase())
+				&& !/[.!?;:]$/.test(line);
+		}
+
+		function renderExtractedTextInReader(data) {
+			if (!data || typeof data.text !== "string") {
+				throw new Error("The extracted document text is unavailable. Extract the PDF and try again.");
+			}
+
+			resetReaderContent();
+			const normalizedText = data.text
+				.replace(/\r\n?/g, "\n")
+				.replace(/\f/g, "\n\n")
+				.replace(/\n[ \t]*\n(?:[ \t]*\n)+/g, "\n\n")
+				.trim();
+
+			if (!normalizedText) {
+				const emptyMessage = document.createElement("p");
+				emptyMessage.className = "reader-empty";
+				emptyMessage.textContent =
+					"No readable text was extracted. This PDF may contain scanned images and require OCR.";
+				readerContent.append(emptyMessage);
+			}
+			else if (Array.isArray(data.blocks) && data.blocks.some(block =>
+				block && ["p", "h2", "ul", "ol", "blockquote", "table", "code", "footnote"].includes(block.type)
+					&& typeof block.text === "string" && block.text.trim())) {
+				for (const block of data.blocks) {
+					if (!block || typeof block.text !== "string" || !block.text.trim()) continue;
+					if (block.type === "table") {
+						const table = document.createElement("table");
+						const body = document.createElement("tbody");
+						for (const rowText of block.text.split("\n")) {
+							const row = document.createElement("tr");
+							for (const cellText of rowText.split("\t")) {
+								const cell = document.createElement("td");
+								cell.textContent = cellText;
+								row.append(cell);
+							}
+							body.append(row);
+						}
+						table.append(body);
+						readerContent.append(table);
+						continue;
+					}
+					if (block.type === "code") {
+						const pre = document.createElement("pre");
+						const code = document.createElement("code");
+						code.textContent = block.text;
+						pre.append(code);
+						readerContent.append(pre);
+						continue;
+					}
+					if (block.type === "ul" || block.type === "ol") {
+						const list = document.createElement(block.type);
+						for (const item of block.text.split("\n")) {
+							if (!item.trim()) continue;
+							const listItem = document.createElement("li");
+							listItem.textContent = item;
+							list.append(listItem);
+						}
+						if (list.childElementCount) readerContent.append(list);
+						continue;
+					}
+
+					const tagName = block.type === "h2" || block.type === "blockquote"
+						? block.type : block.type === "footnote" ? "aside" : block.type === "p" ? "p" : null;
+					if (!tagName) continue;
+					const element = document.createElement(tagName);
+					element.textContent = block.text;
+					if (tagName === "p") element.className = "reader-extracted-paragraph";
+					if (block.type === "footnote") element.className = "reader-footnote";
+					readerContent.append(element);
+				}
+			}
+			else {
+				for (const paragraphText of normalizedText.split(/\n[ \t]*\n+/)) {
+					const value = paragraphText.trim();
+					if (!value) continue;
+					const element = document.createElement(isConservativeHeading(value) ? "h2" : "p");
+					element.textContent = value;
+					if (element.tagName === "P") element.className = "reader-extracted-paragraph";
+					readerContent.append(element);
+				}
+			}
+
+			readerFontSize = 1.15;
+			readerContent.style.fontSize = `${readerFontSize}rem`;
+			const metadata = data.metadata || {};
+			const pageCountLabel = Number.isInteger(data.pageCount) && data.pageCount >= 0
+				? `${data.pageCount} ${data.pageCount === 1 ? "page" : "pages"}`
+				: null;
+			const details = [
+				data.fileName || "PDF",
+				pageCountLabel,
+				metadata.title,
+				metadata.author
+			].filter(value => typeof value === "string" && value.trim());
+			document.querySelector("#reader-document-meta").textContent = details.join(" · ");
+			updateReaderOutline();
+			document.querySelector("#reader-outline").open = false;
+			const themeButton = document.querySelector("#reader-theme");
+			themeButton.setAttribute("aria-pressed", "false");
+			themeButton.setAttribute("aria-label", "Switch to dark theme");
+			document.body.classList.add("reading-mode");
+			document.title = `${data.fileName || "Iqra Reader"} | Iqra`;
+			readerDocument.classList.add("visible");
+			emptyState.classList.add("hidden");
+			window.scrollTo(0, 0);
+		}
+
+		function updateFileCard(file, isValid) {
+			document.querySelector("#file-name").textContent = file.name;
+			document.querySelector("#file-size").textContent = formatSize(file.size);
+			document.querySelector("#file-type").textContent = file.type || "File type not provided";
+			selectedFile.classList.add("visible");
+			selectedFile.classList.toggle("invalid", !isValid);
+		}
+
+		async function selectFile(file) {
+			if (!file || inFlight) return;
+			fileInput.value = "";
+			activeFile = null;
+			extractedText = "";
+			extractionResult = null;
+			submitButton.disabled = true;
+			results.classList.remove("visible");
+			readerDocument.classList.remove("visible");
+			resetReaderContent();
+			emptyState.classList.remove("hidden");
+			document.querySelector("#action-feedback").textContent = "";
+			clearNotice();
+			updateFileCard(file, false);
+
+			if (file.size === 0) {
+				showNotice("This file is empty. Choose a PDF that contains data.", "error");
+				return;
+			}
+			if (file.size > maximumFileSize) {
+				showNotice("This PDF exceeds the 10 MB upload limit.", "error");
+				return;
+			}
+			if (!/\.pdf$/i.test(file.name)) {
+				showNotice("Choose a file with a .pdf extension.", "error");
+				return;
+			}
+
+			try {
+				const header = new TextDecoder().decode(await file.slice(0, 1024).arrayBuffer());
+				if (!header.includes("%PDF-")) {
+					showNotice("This file does not have a PDF signature. Choose a valid PDF document.", "error");
+					return;
+				}
+			}
+			catch {
+				showNotice("The selected file could not be read. Please choose it again.", "error");
+				return;
+			}
+
+			activeFile = file;
+			updateFileCard(file, true);
+			submitButton.disabled = false;
+		}
+
+		function resetWorkspace() {
+			activeFile = null;
+			extractedText = "";
+			resultFileName = "";
+			extractionResult = null;
+			resetReaderContent();
+			document.body.classList.remove("reading-mode", "reader-dark");
+			document.title = "Iqra | PDF Text Extraction Workspace";
+			fileInput.value = "";
+			selectedFile.classList.remove("visible", "invalid");
+			results.classList.remove("visible");
+			readerDocument.classList.remove("visible");
+			emptyState.classList.remove("hidden");
+			document.querySelector("#reader-outline").open = false;
+			const themeButton = document.querySelector("#reader-theme");
+			themeButton.setAttribute("aria-pressed", "false");
+			themeButton.setAttribute("aria-label", "Switch to dark theme");
+			submitButton.disabled = true;
+			document.querySelector("#action-feedback").textContent = "";
+			clearNotice();
+		}
+
+		function setLoading(loading) {
+			inFlight = loading;
+			submitButton.disabled = loading || !activeFile;
+			document.querySelector("#remove-file").disabled = loading;
+			document.querySelector("#clear-button").disabled = loading;
+			document.querySelector("#reader-back").disabled = loading;
+			submitButton.classList.toggle("loading", loading);
+			buttonLabel.textContent = loading ? "Extracting…" : "Extract text only";
+		}
+
+		function renderResult(data) {
+			readerDocument.classList.remove("visible");
+			document.querySelector("#result-filename").textContent = data.fileName || "Uploaded PDF";
+			document.querySelector("#result-pages").textContent =
+				`${data.pageCount} ${data.pageCount === 1 ? "page" : "pages"}`;
+			const metadata = document.querySelector("#metadata");
+			metadata.replaceChildren();
+			for (const [label, value] of Object.entries(data.metadata || {})) {
+				const entry = document.createElement("div");
+				const term = document.createElement("dt");
+				const description = document.createElement("dd");
+				term.textContent = label;
+				description.textContent = value || "Not available";
+				if (!value) description.classList.add("missing");
+				entry.append(term, description);
+				metadata.append(entry);
+			}
+
+			extractedText = data.text || "";
+			extractionResult = data;
+			const hasExtractedText = extractedText.trim().length > 0;
+			resultFileName = data.fileName || activeFile?.name || "extracted-text.pdf";
+			const text = document.querySelector("#extracted-text");
+			text.textContent = hasExtractedText ? extractedText : "No text was found in this PDF.";
+			text.classList.toggle("empty-text", !hasExtractedText);
+			document.querySelector("#read-extracted-button").disabled = false;
+			document.querySelector("#copy-button").disabled = !hasExtractedText;
+			document.querySelector("#download-button").disabled = !hasExtractedText;
+			emptyState.classList.add("hidden");
+			results.classList.add("visible");
+			showNotice("PDF extracted successfully.", "success");
+		}
+
+		function userErrorMessage(status, data) {
+			switch (data?.error) {
+				case "invalid_pdf":
+					return "PDF could not be read. It may be malformed, damaged, or password-protected.";
+				case "file_too_large":
+					return "This PDF exceeds the server’s upload size limit.";
+				case "invalid_multipart_request":
+					return "The upload could not be read. Please select the PDF and try again.";
+				case "internal_server_error":
+					return "The server encountered an unexpected problem. Please try again.";
+				default:
+					if (status === 413) return "This PDF exceeds the server’s upload size limit.";
+					if (status >= 500) return "The server encountered an unexpected problem. Please try again.";
+					return "The request could not be completed. Check the PDF and try again.";
+			}
+		}
+
+		function updateReaderOutline() {
+			const outline = document.querySelector("#reader-outline-nav");
+			outline.replaceChildren();
+			const headings = readerContent.querySelectorAll("h1, h2, h3, h4, h5, h6");
+			headings.forEach((heading, index) => {
+				heading.id = `reader-heading-${index + 1}`;
+				const link = document.createElement("a");
+				link.href = `#${heading.id}`;
+				link.dataset.level = heading.tagName.slice(1);
+				link.textContent = heading.textContent;
+				link.addEventListener("click", () => {
+					document.querySelector("#reader-outline").open = false;
+				});
+				outline.append(link);
+			});
+			document.querySelector("#reader-outline").hidden = headings.length === 0;
+		}
+
+		async function checkHealth() {
+			try {
+				const response = await fetch("/api/v1/pdfs/health");
+				if (!response.ok) throw new Error("API unavailable");
+				const data = await response.json();
+				healthStatus.dataset.state = data.status === "UP" ? "up" : "down";
+				healthLabel.textContent = data.status === "UP" ? "API connected" : "API unavailable";
+			}
+			catch {
+				healthStatus.dataset.state = "down";
+				healthLabel.textContent = "API unavailable";
+			}
+		}
+
+		fileInput.addEventListener("change", () => selectFile(fileInput.files[0]));
+
+		document.querySelector("#remove-file").addEventListener("click", resetWorkspace);
+		document.querySelector("#clear-button").addEventListener("click", resetWorkspace);
+		document.querySelector("#reader-back").addEventListener("click", resetWorkspace);
+		document.querySelector("#read-extracted-button").addEventListener("click", () => {
+			try {
+				renderExtractedTextInReader(extractionResult);
+			}
+			catch (error) {
+				showNotice(error instanceof Error
+					? error.message : "The extracted text could not be opened.");
+			}
+		});
+		document.querySelector("#reader-smaller").addEventListener("click", () => {
+			readerFontSize = Math.max(0.95, Math.round((readerFontSize - 0.1) * 100) / 100);
+			document.querySelector("#reader-content").style.fontSize = `${readerFontSize}rem`;
+		});
+		document.querySelector("#reader-larger").addEventListener("click", () => {
+			readerFontSize = Math.min(1.5, Math.round((readerFontSize + 0.1) * 100) / 100);
+			document.querySelector("#reader-content").style.fontSize = `${readerFontSize}rem`;
+		});
+		document.querySelector("#reader-theme").addEventListener("click", event => {
+			const button = event.currentTarget;
+			const isDark = document.body.classList.toggle("reader-dark");
+			button.setAttribute("aria-pressed", String(isDark));
+			button.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
+		});
+		for (const eventName of ["dragenter", "dragover"]) {
+			dropArea.addEventListener(eventName, event => {
+				event.preventDefault();
+				dropArea.classList.add("dragging");
+			});
+		}
+
+		for (const eventName of ["dragleave", "drop"]) {
+			dropArea.addEventListener(eventName, event => {
+				event.preventDefault();
+				dropArea.classList.remove("dragging");
+			});
+		}
+
+		dropArea.addEventListener("drop", event => selectFile(event.dataTransfer.files[0]));
+
+		form.addEventListener("submit", async event => {
+			event.preventDefault();
+			if (inFlight) return;
+			if (!activeFile) {
+				showNotice("Choose a valid PDF before starting extraction.", "error");
+				return;
+			}
+
+			const formData = new FormData();
+			formData.append("file", activeFile);
+			setLoading(true);
+			clearNotice();
+
+			try {
+				const response = await fetch("/api/v1/pdfs/extract", { method: "POST", body: formData });
+				const data = await response.json().catch(() => null);
+				if (!response.ok) {
+					throw new Error(userErrorMessage(response.status, data));
+				}
+				renderResult(data);
+			}
+			catch (error) {
+				showNotice(error instanceof TypeError
+					? "Could not reach the Iqra API. Check that the application is running and try again."
+					: error instanceof Error ? error.message : "The PDF could not be processed.", "error");
+			}
+			finally {
+				setLoading(false);
+			}
+		});
+
+		document.querySelector("#copy-button").addEventListener("click", async () => {
+			try {
+				await navigator.clipboard.writeText(extractedText);
+				document.querySelector("#action-feedback").textContent = "Extracted text copied to clipboard.";
+			}
+			catch {
+				showNotice("Could not copy text. Select it and copy it manually.", "error");
+			}
+		});
+
+		document.querySelector("#download-button").addEventListener("click", () => {
+			const baseName = resultFileName.split(/[\\/]/).pop().replace(/\.pdf$/i, "") || "extracted-text";
+			const url = URL.createObjectURL(new Blob([extractedText], { type: "text/plain;charset=utf-8" }));
+			const link = document.createElement("a");
+			link.href = url;
+			link.download = `${baseName}.txt`;
+			document.body.append(link);
+			link.click();
+			link.remove();
+			window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+			document.querySelector("#action-feedback").textContent = "Text file download started.";
+		});
+
+		checkHealth();
+	</script>
+</body>
+</html>
