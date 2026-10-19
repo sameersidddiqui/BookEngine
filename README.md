@@ -53,14 +53,18 @@ docker run --rm -p 8080:8080 -e PORT=8080 bookengine
 ```
 
 The runtime image uses Java 21 and a non-root user. It listens on the `PORT`
-environment variable (default `10000`), as expected by Render. `.dockerignore`
-keeps local build outputs, environment files, and secret/credential files out
-of the build context. Supply any deployment-specific settings through
-environment variables rather than storing credentials in the repository.
+environment variable (default `10000` in Docker and `8080` when run directly),
+as expected by Render. `.dockerignore` keeps local build outputs, environment
+files, and secret/credential files out of the build context. Configure upload
+limits with `APP_UPLOAD_MAX_FILE_SIZE` (default `10MB`) and
+`APP_UPLOAD_MAX_REQUEST_SIZE` (default `11MB`). Supply deployment-specific
+settings through environment variables rather than storing credentials in the
+repository.
 
-On Render, create a Docker web service from the `main` branch and use the
-repository root as its Docker build context. Render supplies `PORT` to the
-container at runtime.
+On Render, create a Blueprint from the repository's `render.yaml`, or create a
+Docker web service from the `main` branch using the repository root as its
+Docker build context. The Blueprint sets the health check to
+`/api/v1/pdfs/health`; Render supplies `PORT` to the container at runtime.
 
 ## Extract a PDF
 

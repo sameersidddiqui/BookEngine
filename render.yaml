@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: bookengine
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/pdfs/health
+    envVars:
+      - key: APP_UPLOAD_MAX_FILE_SIZE
+        value: 10MB
+      - key: APP_UPLOAD_MAX_REQUEST_SIZE
+        value: 11MB
