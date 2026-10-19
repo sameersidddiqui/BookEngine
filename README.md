@@ -75,12 +75,13 @@ Docker web service from the `main` branch using the repository root as its
 Docker build context. The Blueprint sets the health check to
 `/api/v1/pdfs/health`; Render supplies `PORT` to the container at runtime.
 The default storage directory is `./data/pdfs` and can be overridden with
-`APP_PDF_STORAGE_DIR`. Filesystems on many hosted web services are ephemeral;
-attach a persistent disk and set this variable to its mount path (for example
-`/var/data/pdfs`) to retain the library across deployments and instance
-replacement. The browser cookie scopes a library to one browser, not to a user
-account; the application does not currently provide account sign-in or
-cross-device synchronization.
+`APP_PDF_STORAGE_DIR`. The Docker image uses `/app/data/pdfs` by default and
+creates that directory with write access for its non-root application user.
+Filesystems on many hosted web services are ephemeral; attach a persistent
+disk and set this variable to its mount path (for example `/var/data/pdfs`) to
+retain the library across deployments and instance replacement. The browser
+cookie scopes a library to one browser, not to a user account; the application
+does not currently provide account sign-in or cross-device synchronization.
 
 ## Extract a PDF
 

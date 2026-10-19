@@ -21,11 +21,15 @@ FROM eclipse-temurin:21-jre-alpine AS runtime
 WORKDIR /app
 
 RUN addgroup -S spring \
-	&& adduser -S spring -G spring
+	&& adduser -S spring -G spring \
+	&& mkdir -p /app/data/pdfs \
+	&& chown -R spring:spring /app/data
 
 COPY --from=build --chown=spring:spring /workspace/package/app.jar /app/app.jar
 
 USER spring:spring
+
+ENV APP_PDF_STORAGE_DIR=/app/data/pdfs
 
 EXPOSE 10000
 

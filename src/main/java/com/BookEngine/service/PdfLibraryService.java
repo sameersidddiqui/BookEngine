@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import com.BookEngine.dto.PdfExtractionResponse;
 import com.BookEngine.dto.PdfLibraryDocumentResponse;
 import com.BookEngine.dto.PdfLibraryItemResponse;
-import com.BookEngine.extractor.PdfExtractionException;
 import com.BookEngine.validation.PdfFileValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
