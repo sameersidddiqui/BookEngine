@@ -202,22 +202,18 @@
 		body.reading-mode .site-header, body.reading-mode #upload-view, body.reading-mode .results-view, body.reading-mode footer { display: none !important; }
 		body.reading-mode .reader-document { display: block; min-height: 100vh; border: 0; border-radius: 0; }
 		.reader-toolbar { position: sticky; z-index: 10; top: 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px clamp(14px, 4vw, 40px); border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(12px); }
-		.reader-title { min-width: 110px; max-width: 28vw; overflow: hidden; margin: 0 auto 0 0; font-family: Georgia, "Times New Roman", serif; font-size: 18px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+		.reader-title { min-width: 110px; max-width: 28vw; overflow: hidden; margin: 0 auto 0 0; font-size: 18px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
 		.reader-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 		.reader-control { min-width: 44px; padding: 8px 10px; color: var(--ink); }
 		.reader-control.text { min-width: auto; }
 		.reader-progress-label { min-width: 60px; color: var(--muted); font-size: 13px; text-align: right; }
-		.reader-search { display: flex; align-items: center; gap: 6px; width: 100%; padding: 10px clamp(14px, 4vw, 40px); border-bottom: 1px solid var(--line); background: var(--surface-raised); }
-		.reader-search input { width: min(420px, 45vw); min-height: 44px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
-		.search-count { min-width: 90px; color: var(--muted); font-size: 13px; }
 		.reader-layout { display: grid; grid-template-columns: minmax(190px, 240px) minmax(0, 1fr); gap: clamp(22px, 5vw, 72px); max-width: 1200px; margin: 0 auto; padding: 38px 28px 100px; }
 		.reader-outline { position: sticky; top: 112px; align-self: start; max-height: calc(100vh - 140px); overflow: auto; padding: 10px 0; }
 		.reader-outline summary { margin: 0 0 12px; color: var(--muted); font-size: 13px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
 		.reader-outline ol { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
 		.reader-outline a { display: block; padding: 7px 10px; border-left: 2px solid transparent; border-radius: 0 6px 6px 0; color: var(--muted); font-size: 14px; line-height: 1.4; text-decoration: none; }
 		.reader-outline a:hover, .reader-outline a[aria-current="location"] { border-color: var(--green); background: var(--green-soft); color: var(--ink); }
-		.reader-content { --reader-width: 720px; --reader-size: 1.2rem; --reader-leading: 1.8; width: min(100%, var(--reader-width)); margin: 0 auto; color: var(--ink); font-family: Georgia, "Times New Roman", serif; font-size: var(--reader-size); line-height: var(--reader-leading); overflow-wrap: anywhere; }
-		.reader-content.sans { font-family: ui-sans-serif, system-ui, sans-serif; }
+		.reader-content { --reader-width: 720px; --reader-size: 1.2rem; --reader-leading: 1.8; width: min(100%, var(--reader-width)); margin: 0 auto; color: var(--ink); font-family: ui-sans-serif, system-ui, sans-serif; font-size: var(--reader-size); line-height: var(--reader-leading); overflow-wrap: anywhere; }
 		.reader-content > * { content-visibility: auto; contain-intrinsic-size: auto 180px; }
 		.reader-content h2 { margin: 1.65em 0 .6em; font-size: 1.5em; font-weight: 600; letter-spacing: -.025em; line-height: 1.25; scroll-margin-top: 115px; }
 		.reader-content > :first-child { margin-top: 0; }
@@ -230,16 +226,8 @@
 		.reader-content pre { overflow-x: auto; margin: 0 0 1.2em; padding: 1em; border-radius: 8px; background: var(--green-soft); font-size: .8em; line-height: 1.55; }
 		.reader-content .reader-footnote { margin: 1.2em 0; color: var(--muted); font-size: .88em; line-height: 1.55; }
 		.reader-content blockquote { margin: 0 0 1.15em; padding: .1em 0 .1em 1.1em; border-left: 3px solid var(--green); color: var(--muted); font-style: italic; }
-		.reader-content mark { border-radius: 2px; background: #f3c969; color: #242014; }
 		.reader-empty { padding: 22px; border: 1px solid var(--line); border-radius: 10px; background: var(--green-soft); font-family: ui-sans-serif, system-ui, sans-serif; }
-		.reader-outline-wrap { position: relative; }
 		.back-to-top { position: fixed; right: 22px; bottom: 22px; z-index: 12; box-shadow: var(--shadow); }
-		.shortcuts { position: relative; }
-		.shortcuts-popover { position: absolute; z-index: 20; right: 0; top: calc(100% + 8px); width: 230px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-raised); box-shadow: var(--shadow); font-size: 13px; }
-		.shortcuts-popover h2 { margin: 0 0 8px; font-size: 14px; }
-		.shortcuts-popover dl { display: grid; grid-template-columns: 1fr auto; gap: 7px 12px; margin: 0; color: var(--muted); }
-		.shortcuts-popover dt { color: var(--ink); }
-		.shortcuts-popover dd { margin: 0; font-family: ui-monospace, monospace; }
 		.toast { position: fixed; z-index: 50; right: 20px; bottom: 20px; max-width: min(420px, calc(100vw - 40px)); transform: translateY(20px); padding: 13px 17px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-raised); color: var(--ink); box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
 		.toast.visible { transform: translateY(0); opacity: 1; }
 		.drop-overlay { position: fixed; z-index: 80; inset: 0; display: grid; place-items: center; padding: 24px; background: rgb(20 34 26 / 70%); color: white; pointer-events: none; }
@@ -290,8 +278,6 @@
 			.reader-tools { gap: 3px; }
 			.reader-control { min-width: 44px; padding: 7px 8px; }
 			.reader-progress-label { min-width: auto; }
-			.reader-search { flex-wrap: wrap; padding: 8px; }
-			.reader-search input { flex: 1; width: auto; }
 			.reader-layout { padding: 20px 18px 80px; }
 			.reader-content { --reader-width: 100% !important; }
 			.back-to-top { right: 12px; bottom: 12px; }
@@ -305,7 +291,7 @@
 			body * { visibility: hidden !important; }
 			.reader-document, .reader-document * { visibility: visible !important; }
 			.reader-document { position: absolute; inset: 0; width: 100%; border: 0 !important; }
-			.reader-toolbar, .reader-progress, .reader-outline, .reader-search, .back-to-top { display: none !important; }
+			.reader-toolbar, .reader-progress, .reader-outline, .back-to-top { display: none !important; }
 			.reader-layout { display: block; max-width: none; margin: 0; padding: 0; }
 			.reader-content { width: 100%; max-width: none; color: #000; font-size: 12pt; }
 		}
@@ -385,18 +371,11 @@
 					<button class="reader-control text" id="reader-back" type="button" aria-label="Return to results">← Results</button>
 					<h1 class="reader-title" id="reader-title" tabindex="-1"></h1>
 					<div class="reader-tools">
-						<button class="reader-control text" id="new-file-reader" type="button">New file</button>
 						<button class="reader-control" id="font-smaller" type="button" aria-label="Decrease font size">A−</button><button class="reader-control" id="font-larger" type="button" aria-label="Increase font size">A+</button>
-						<button class="reader-control text" id="font-family" type="button" aria-pressed="false" aria-label="Use sans-serif type">Serif</button>
-						<label class="reader-control text" for="line-height">Line <select id="line-height" aria-label="Line height"><option value="1.5">Compact</option><option value="1.8">Comfort</option><option value="2.1">Airy</option></select></label>
-						<label class="reader-control text" for="content-width">Width <select id="content-width" aria-label="Content width"><option value="620px">Narrow</option><option value="720px">Comfort</option><option value="900px">Wide</option></select></label>
 						<button class="reader-control text" id="theme-toggle" type="button" aria-label="Cycle color theme">Theme: Auto</button>
-						<button class="reader-control text" id="open-search" type="button" aria-label="Search in document">Find</button>
-						<details class="shortcuts"><summary class="reader-control" aria-label="Keyboard shortcuts">?</summary><div class="shortcuts-popover"><h2>Keyboard shortcuts</h2><dl><dt>Close reader / panels</dt><dd>Esc</dd><dt>Increase / decrease size</dt><dd>+ / −</dd><dt>Open search</dt><dd>/ or ⌘/Ctrl+F</dd><dt>Next search match</dt><dd>Enter</dd><dt>Previous match</dt><dd>Shift+Enter</dd></dl></div></details>
 					</div>
 					<span class="reader-progress-label" id="progress-label">0% read</span>
 				</div>
-				<div class="reader-search" id="reader-search" hidden><label for="search-input">Find in document</label><input id="search-input" type="search" autocomplete="off"><button class="button small" id="search-prev" type="button" aria-label="Previous match">Previous</button><button class="button small" id="search-next" type="button" aria-label="Next match">Next</button><span class="search-count" id="search-count" aria-live="polite">0 matches</span><button class="button small" id="close-search" type="button">Close</button></div>
 				<div class="reader-layout">
 					<details class="reader-outline" id="reader-outline" open><summary>Contents</summary><nav aria-label="Contents"><ol id="outline-list"></ol></nav></details>
 					<article class="reader-content" id="reader-content"></article>
@@ -435,14 +414,12 @@
 		let requestTimer = 0;
 		let dragDepth = 0;
 		let outlineObserver = null;
-		let searchMatches = [];
-		let currentMatch = -1;
 		let renderGeneration = 0;
 		let readerReturnScroll = 0;
 		let returnFocusTarget = null;
 		let showAllMetadata = false;
 		let themePreference = "auto";
-		let readerSettings = { size: 1.2, family: "serif", lineHeight: "1.8", width: "720px" };
+		let readerSettings = { size: 1.2 };
 
 		function loadPreference(key, fallback) {
 			try { return localStorage.getItem(key) ?? fallback; }
@@ -923,7 +900,6 @@
 		}
 		function finishReaderContent() {
 			updateOutline();
-			if (!$("#reader-search").hidden && $("#search-input").value.trim()) highlightSearch($("#search-input").value);
 			updateReadingProgress();
 		}
 		function updateOutline() {
@@ -960,19 +936,9 @@
 			} catch (error) { console.warn("Iqra could not restore reader settings.", error); }
 			const allowedSizes = [1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6];
 			if (!allowedSizes.includes(Number(readerSettings.size))) readerSettings.size = 1.2;
-			if (!["serif", "sans"].includes(readerSettings.family)) readerSettings.family = "serif";
-			if (!["1.5", "1.8", "2.1"].includes(String(readerSettings.lineHeight))) readerSettings.lineHeight = "1.8";
-			if (!["620px", "720px", "900px"].includes(readerSettings.width)) readerSettings.width = "720px";
 		}
 		function applyReaderSettings() {
 			readerContent.style.setProperty("--reader-size", `${readerSettings.size}rem`);
-			readerContent.style.setProperty("--reader-leading", readerSettings.lineHeight);
-			readerContent.style.setProperty("--reader-width", readerSettings.width);
-			readerContent.classList.toggle("sans", readerSettings.family === "sans");
-			$("#font-family").textContent = readerSettings.family === "serif" ? "Serif" : "Sans";
-			$("#font-family").setAttribute("aria-pressed", String(readerSettings.family === "sans"));
-			$("#line-height").value = String(readerSettings.lineHeight);
-			$("#content-width").value = readerSettings.width;
 		}
 		function persistReaderSettings() { savePreference(keys.reader, JSON.stringify(readerSettings)); }
 		function applyTheme(theme) {
@@ -988,13 +954,13 @@
 			returnFocusTarget = trigger || $("#read-button");
 			readerReturnScroll = window.scrollY;
 			buildReaderContent(extractionResult);
+			$("#reader-outline").open = window.matchMedia("(min-width: 561px)").matches;
 			setState("reading");
 			setTitle($("#reader-title").textContent);
 			window.scrollTo(0, 0);
 			$("#reader-title").focus({ preventScroll: true });
 		}
 		function returnToResults() {
-			closeSearch();
 			setState("results");
 			setTitle("Results");
 			window.scrollTo(0, readerReturnScroll);
@@ -1007,61 +973,6 @@
 			const percent = max <= 0 ? 100 : Math.min(100, Math.max(0, Math.round(window.scrollY / max * 100)));
 			$("#reader-progress-fill").style.width = `${percent}%`;
 			$("#progress-label").textContent = `${percent}% read`;
-		}
-		function clearHighlights() {
-			readerContent.querySelectorAll("mark[data-search]").forEach(mark => mark.replaceWith(document.createTextNode(mark.textContent || "")));
-			readerContent.normalize();
-			searchMatches = [];
-			currentMatch = -1;
-		}
-		function highlightSearch(query) {
-			clearHighlights();
-			const value = query.trim();
-			if (!value) { $("#search-count").textContent = "0 matches"; return; }
-			const walker = document.createTreeWalker(readerContent, NodeFilter.SHOW_TEXT, {
-				acceptNode(node) { return node.parentElement?.closest("mark, script, style") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
-			});
-			const nodes = [];
-			while (walker.nextNode()) nodes.push(walker.currentNode);
-			for (const node of nodes) {
-				const text = node.textContent || "";
-				const lower = text.toLocaleLowerCase();
-				const term = value.toLocaleLowerCase();
-				let start = 0;
-				let matchAt = lower.indexOf(term, start);
-				if (matchAt < 0) continue;
-				const fragment = document.createDocumentFragment();
-				while (matchAt >= 0) {
-					fragment.append(document.createTextNode(text.slice(start, matchAt)));
-					const mark = document.createElement("mark");
-					mark.dataset.search = "true";
-					mark.textContent = text.slice(matchAt, matchAt + value.length);
-					fragment.append(mark);
-					searchMatches.push(mark);
-					start = matchAt + value.length;
-					matchAt = lower.indexOf(term, start);
-				}
-				fragment.append(document.createTextNode(text.slice(start)));
-				node.parentNode?.replaceChild(fragment, node);
-			}
-			$("#search-count").textContent = `${searchMatches.length} ${searchMatches.length === 1 ? "match" : "matches"}`;
-			if (searchMatches.length) goToMatch(0);
-		}
-		function goToMatch(direction) {
-			if (!searchMatches.length) return;
-			currentMatch = (currentMatch + direction + searchMatches.length) % searchMatches.length;
-			searchMatches.forEach((mark, index) => mark.style.outline = index === currentMatch ? "2px solid currentColor" : "");
-			searchMatches[currentMatch].scrollIntoView({ block: "center", behavior: "smooth" });
-			$("#search-count").textContent = `${currentMatch + 1} of ${searchMatches.length} matches`;
-		}
-		function openSearch() {
-			$("#reader-search").hidden = false;
-			$("#search-input").focus();
-		}
-		function closeSearch() {
-			$("#reader-search").hidden = true;
-			$("#search-input").value = "";
-			clearHighlights();
 		}
 		function renderRecentFiles() {
 			const names = loadRecentFiles();
@@ -1101,7 +1012,6 @@
 		$("#reader-action").addEventListener("click", event => openReader(event.currentTarget));
 		$("#reader-back").addEventListener("click", returnToResults);
 		$("#new-file").addEventListener("click", clearWorkspace);
-		$("#new-file-reader").addEventListener("click", clearWorkspace);
 		$("#empty-new-file").addEventListener("click", clearWorkspace);
 		$("#health-retry").addEventListener("click", checkHealth);
 		$("#copy-text").addEventListener("click", () => copyText(extractionResult?.text || "", "Text copied."));
@@ -1123,21 +1033,9 @@
 		});
 		$("#font-smaller").addEventListener("click", () => { readerSettings.size = Math.max(1, Math.round((readerSettings.size - .1) * 10) / 10); applyReaderSettings(); persistReaderSettings(); });
 		$("#font-larger").addEventListener("click", () => { readerSettings.size = Math.min(1.6, Math.round((readerSettings.size + .1) * 10) / 10); applyReaderSettings(); persistReaderSettings(); });
-		$("#font-family").addEventListener("click", () => { readerSettings.family = readerSettings.family === "serif" ? "sans" : "serif"; applyReaderSettings(); persistReaderSettings(); });
-		$("#line-height").addEventListener("change", event => { readerSettings.lineHeight = event.target.value; applyReaderSettings(); persistReaderSettings(); });
-		$("#content-width").addEventListener("change", event => { readerSettings.width = event.target.value; applyReaderSettings(); persistReaderSettings(); });
 		$("#theme-toggle").addEventListener("click", () => {
 			const themes = ["auto", "light", "sepia", "dark"];
 			applyTheme(themes[(themes.indexOf(themePreference) + 1) % themes.length]);
-		});
-		$("#open-search").addEventListener("click", openSearch);
-		$("#close-search").addEventListener("click", () => { closeSearch(); $("#open-search").focus(); });
-		$("#search-input").addEventListener("input", event => highlightSearch(event.target.value));
-		$("#search-next").addEventListener("click", () => goToMatch(1));
-		$("#search-prev").addEventListener("click", () => goToMatch(-1));
-		$("#search-input").addEventListener("keydown", event => {
-			if (event.key === "Enter") { event.preventDefault(); goToMatch(event.shiftKey ? -1 : 1); }
-			if (event.key === "Escape") { closeSearch(); $("#open-search").focus(); }
 		});
 		$("#back-to-top").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 		window.addEventListener("scroll", updateReadingProgress, { passive: true });
@@ -1146,16 +1044,11 @@
 			const target = event.target;
 			const typing = target instanceof HTMLElement && (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) || target.isContentEditable);
 			if (state === "reading" && (event.key === "Escape")) {
-				const shortcuts = $(".shortcuts");
-				if (shortcuts.open) { shortcuts.open = false; event.preventDefault(); return; }
 				if ($("#reader-outline").open) { $("#reader-outline").open = false; event.preventDefault(); return; }
-				if (!$("#reader-search").hidden) { closeSearch(); event.preventDefault(); return; }
 				returnToResults(); event.preventDefault(); return;
 			}
 			if (state !== "reading" || typing || event.altKey) return;
-			if ((event.key === "f" || event.key === "F") && (event.metaKey || event.ctrlKey)) { event.preventDefault(); openSearch(); }
-			else if (event.key === "/") { event.preventDefault(); openSearch(); }
-			else if (event.key === "+" || event.key === "=") { readerSettings.size = Math.min(1.6, Math.round((readerSettings.size + .1) * 10) / 10); applyReaderSettings(); persistReaderSettings(); }
+			if (event.key === "+" || event.key === "=") { readerSettings.size = Math.min(1.6, Math.round((readerSettings.size + .1) * 10) / 10); applyReaderSettings(); persistReaderSettings(); }
 			else if (event.key === "-" || event.key === "_") { readerSettings.size = Math.max(1, Math.round((readerSettings.size - .1) * 10) / 10); applyReaderSettings(); persistReaderSettings(); }
 		});
 		document.addEventListener("paste", event => {
